@@ -7,6 +7,7 @@ import {
   getMyReviews,
   canReviewProduct,
   getAllReviews,
+  updateReviewStatus,
   adminDeleteReview,
 } from "../controllers/reviewController.js";
 import { authenticate, authorize } from "../middlewares/auth.js";
@@ -39,6 +40,14 @@ router.delete("/:id", authenticate, deleteReview);
 
 // Get all reviews (admin)
 router.get("/admin/all", authenticate, authorize("admin"), getAllReviews);
+
+// Update review status (admin)
+router.patch(
+  "/admin/:id/status",
+  authenticate,
+  authorize("admin"),
+  updateReviewStatus
+);
 
 // Delete review (admin)
 router.delete(

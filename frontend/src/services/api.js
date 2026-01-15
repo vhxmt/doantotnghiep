@@ -284,8 +284,7 @@ export const reviewAPI = {
   canReview: (productId) => api.get(`/reviews/can-review/${productId}`),
   // Admin
   getAllReviews: (params) => api.get("/reviews/admin/all", { params }),
-  approveReview: (id) => api.patch(`/reviews/admin/${id}/approve`),
-  rejectReview: (id) => api.patch(`/reviews/admin/${id}/reject`),
+  updateReviewStatus: (id, status) => api.patch(`/reviews/admin/${id}/status`, { status }),
   adminDeleteReview: (id) => api.delete(`/reviews/admin/${id}`),
 };
 

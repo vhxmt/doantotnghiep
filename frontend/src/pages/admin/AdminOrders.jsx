@@ -365,12 +365,12 @@ const AdminOrders = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
           <div className="flex items-center">
-            <ShoppingCart className="w-8 h-8 text-blue-600" />
+            <ShoppingCart className="w-8 h-8 text-gray-600" />
             <div className="ml-3">
-              <p className="text-sm font-medium text-gray-600">Tổng đơn hàng</p>
+              <p className="text-sm font-medium text-gray-600">Tổng đơn</p>
               <p className="text-2xl font-bold text-gray-900">
                 {orders.length}
               </p>
@@ -384,6 +384,28 @@ const AdminOrders = () => {
               <p className="text-sm font-medium text-gray-600">Chờ xử lý</p>
               <p className="text-2xl font-bold text-gray-900">
                 {orders.filter((o) => o.status === "pending").length}
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <div className="flex items-center">
+            <CheckCircle className="w-8 h-8 text-blue-600" />
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-600">Đã xác nhận</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {orders.filter((o) => o.status === "confirmed").length}
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <div className="flex items-center">
+            <Package className="w-8 h-8 text-indigo-600" />
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-600">Đang đóng gói</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {orders.filter((o) => o.status === "packing").length}
               </p>
             </div>
           </div>
@@ -412,13 +434,11 @@ const AdminOrders = () => {
         </div>
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
           <div className="flex items-center">
-            <DollarSign className="w-8 h-8 text-green-600" />
+            <XCircle className="w-8 h-8 text-red-600" />
             <div className="ml-3">
-              <p className="text-sm font-medium text-gray-600">Doanh thu</p>
-              <p className="text-lg font-bold text-gray-900">
-                {formatPrice(
-                  orders.reduce((sum, order) => sum + order.total, 0)
-                )}
+              <p className="text-sm font-medium text-gray-600">Đã hủy</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {orders.filter((o) => o.status === "cancelled").length}
               </p>
             </div>
           </div>

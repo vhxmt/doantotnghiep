@@ -23,6 +23,11 @@ router.patch('/:id/status',
   orderController.updateOrderStatus
 );
 
+router.patch('/:id/payment-status',
+  authorize('staff', 'admin'),
+  orderController.updatePaymentStatus
+);
+
 router.patch('/:id/info',
   authorize('admin'),
   orderController.updateOrderInfo

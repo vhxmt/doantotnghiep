@@ -207,14 +207,14 @@ Order.findByOrderNumber = function (orderNumber) {
 Order.findByUser = function (userId) {
   return this.findAll({
     where: { userId },
-    order: [["createdAt", "DESC"]],
+    order: [["created_at", "DESC"]],
   });
 };
 
 Order.findByStatus = function (status) {
   return this.findAll({
     where: { status },
-    order: [["createdAt", "DESC"]],
+    order: [["created_at", "DESC"]],
   });
 };
 

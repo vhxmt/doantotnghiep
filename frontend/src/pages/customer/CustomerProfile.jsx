@@ -18,7 +18,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useAuthStore } from "../../store/authStore";
-import { uploadAPI } from "../../services/api";
+import { uploadAPI, orderAPI } from "../../services/api";
 import { formatPrice } from "../../data/mockData";
 import toast from "react-hot-toast";
 import ChangePasswordModal from "../../components/ChangePasswordModal";
@@ -40,6 +40,11 @@ const CustomerProfile = () => {
     dateOfBirth: "",
     gender: "",
   });
+  const [orderStats, setOrderStats] = useState({
+    totalOrders: 0,
+    totalSpent: 0
+  });
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
 
   useEffect(() => {
     if (user) {
@@ -54,6 +59,38 @@ const CustomerProfile = () => {
       });
     }
   }, [user]);
+
+  useEffect(() => {
+    const fetchOrderStats = async () => {
+      try {
+        setIsLoadingStats(true);
+        const response = await orderAPI.getMyOrders({
+          limit: 1000,
+          page: 1
+        });
+
+        const orders = response.data.data.orders;
+        const totalOrders = response.data.data.pagination.totalItems;
+        const totalSpent = orders.reduce((sum, order) =>
+          sum + Number(order.totalAmount || 0), 0
+        );
+
+        setOrderStats({
+          totalOrders,
+          totalSpent
+        });
+      } catch (error) {
+        console.error('Error fetching order stats:', error);
+        toast.error('Không thể tải thống kê đơn hàng');
+      } finally {
+        setIsLoadingStats(false);
+      }
+    };
+
+    if (user?.id) {
+      fetchOrderStats();
+    }
+  }, [user?.id]);
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -324,14 +361,24 @@ const CustomerProfile = () => {
                   <ShoppingBag className="w-5 h-5 text-blue-600 mr-2" />
                   <span className="text-gray-600">Tổng đơn hàng</span>
                 </div>
-                <span className="font-semibold text-gray-900">1</span>
+                <span className="font-semibold text-gray-900">
+                  {isLoadingStats ? (
+                    <span className="text-gray-400">...</span>
+                  ) : (
+                    orderStats.totalOrders
+                  )}
+                </span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <span className="text-gray-600">Tổng chi tiêu</span>
                 </div>
                 <span className="font-semibold text-gray-900">
-                  {formatPrice(187000)}
+                  {isLoadingStats ? (
+                    <span className="text-gray-400">...</span>
+                  ) : (
+                    formatPrice(orderStats.totalSpent)
+                  )}
                 </span>
               </div>
               <div className="flex items-center justify-between">

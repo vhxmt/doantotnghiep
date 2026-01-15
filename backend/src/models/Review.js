@@ -40,6 +40,11 @@ const Review = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    status: {
+      type: DataTypes.ENUM("pending", "approved", "rejected"),
+      defaultValue: "approved",
+      allowNull: false,
+    },
   },
   {
     tableName: "reviews",
@@ -54,6 +59,7 @@ Review.getAverageRating = async function (productId) {
   const result = await this.findOne({
     where: {
       productId,
+      status: "approved", // Only count approved reviews
     },
     attributes: [
       [sequelize.fn("AVG", sequelize.col("rating")), "averageRating"],
@@ -72,6 +78,7 @@ Review.getRatingDistribution = async function (productId) {
   const distribution = await this.findAll({
     where: {
       productId,
+      status: "approved", // Only count approved reviews
     },
     attributes: [
       "rating",

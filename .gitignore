@@ -184,3 +184,6 @@ Thumbs.db
 # Misc
 *.tgz
 *.tar.gz
+
+# Claude local settings
+.claude/

@@ -32,7 +32,10 @@ export const getOrders = catchAsync(async (req, res) => {
 
   // If user is customer, only show their orders
   // If user is staff/admin and userId is provided, filter by that userId
-  if (req.user.role === 'customer') {
+  const userRoles = req.user.roles?.map(role => role.name) || [];
+  const isCustomer = userRoles.includes('customer') && !userRoles.includes('staff') && !userRoles.includes('admin');
+
+  if (isCustomer) {
     where.userId = req.user.id;
   } else if (userId) {
     where.userId = userId;
@@ -46,6 +49,22 @@ export const getOrders = catchAsync(async (req, res) => {
       { '$User.email$': { [Op.like]: `%${search}%` } }
     ];
   }
+
+  // Map camelCase to snake_case for order clause
+  const sortFieldMap = {
+    'createdAt': 'created_at',
+    'updatedAt': 'updated_at',
+    'orderNumber': 'order_number',
+    'userId': 'user_id',
+    'paymentStatus': 'payment_status',
+    'paymentMethod': 'payment_method',
+    'totalAmount': 'total_amount',
+    'subtotal': 'subtotal',
+    'shippingAmount': 'shipping_amount',
+    'discountAmount': 'discount_amount',
+    'taxAmount': 'tax_amount'
+  };
+  const orderField = sortFieldMap[sortBy] || sortBy;
 
   const { count, rows: orders } = await Order.findAndCountAll({
     where,
@@ -78,7 +97,7 @@ export const getOrders = catchAsync(async (req, res) => {
     ],
     limit: parseInt(limit),
     offset: parseInt(offset),
-    order: [[sortBy, sortOrder.toUpperCase()]],
+    order: [[orderField, sortOrder.toUpperCase()]],
     distinct: true
   });
 
@@ -363,6 +382,35 @@ export const updateOrderStatus = catchAsync(async (req, res) => {
   res.json({
     status: 'success',
     message: 'Order status updated successfully',
+    data: {
+      order
+    }
+  });
+});
+
+/**
+ * Update payment status (Admin/Staff only)
+ */
+export const updatePaymentStatus = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const { paymentStatus } = req.body;
+
+  const order = await Order.findByPk(id);
+  if (!order) {
+    throw new NotFoundError('Order not found');
+  }
+
+  // Validate payment status
+  const validPaymentStatuses = ['unpaid', 'paid', 'refunded', 'failed'];
+  if (!validPaymentStatuses.includes(paymentStatus)) {
+    throw new ValidationError('Invalid payment status');
+  }
+
+  await order.update({ paymentStatus });
+
+  res.json({
+    status: 'success',
+    message: 'Payment status updated successfully',
     data: {
       order
     }

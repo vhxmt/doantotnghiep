@@ -194,6 +194,16 @@ const StaffOrderDetail = () => {
     "delivered",
   ];
 
+  const getNextStatus = () => {
+    if (!order) return null;
+    const currentIndex = statusFlow.indexOf(order.status);
+    if (currentIndex === -1 || currentIndex >= statusFlow.length - 1)
+      return null;
+    return statusFlow[currentIndex + 1];
+  };
+
+  const nextStatus = getNextStatus();
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -241,7 +251,10 @@ const StaffOrderDetail = () => {
          
           {order.status !== "cancelled" && order.status !== "delivered" && (
             <button
-              onClick={() => setIsStatusModalOpen(true)}
+              onClick={() => {
+                setSelectedStatus(nextStatus || order.status);
+                setIsStatusModalOpen(true);
+              }}
               className="btn btn-primary flex items-center space-x-2"
             >
               <Edit className="w-4 h-4" />
@@ -526,80 +539,114 @@ const StaffOrderDetail = () => {
                 Cập nhật trạng thái đơn hàng
               </h3>
 
-              <div className="space-y-3 mb-6">
-                {statusFlow.map((status) => {
-                  const config = getStatusConfig(status);
-                  const Icon = config.icon;
+              {/* Hiển thị trạng thái hiện tại */}
+              <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                <p className="text-sm text-gray-600 mb-1">
+                  Trạng thái hiện tại:
+                </p>
+                <div className="flex items-center">
+                  {(() => {
+                    const config = getStatusConfig(order.status);
+                    const Icon = config.icon;
+                    return (
+                      <>
+                        <Icon className={`w-5 h-5 mr-2 ${config.textColor}`} />
+                        <span className={`font-medium ${config.textColor}`}>
+                          {config.text}
+                        </span>
+                      </>
+                    );
+                  })()}
+                </div>
+              </div>
 
-                  return (
-                    <label
-                      key={status}
-                      className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                        selectedStatus === status
-                          ? config.borderColor + " " + config.bgColor
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="status"
-                        value={status}
-                        checked={selectedStatus === status}
-                        onChange={(e) => setSelectedStatus(e.target.value)}
-                        className="mr-3"
-                      />
-                      <Icon
-                        className={`w-5 h-5 mr-3 ${
-                          selectedStatus === status
-                            ? config.textColor
-                            : "text-gray-400"
-                        }`}
-                      />
-                      <span
-                        className={`font-medium ${
-                          selectedStatus === status
-                            ? config.textColor
-                            : "text-gray-700"
+              <div className="space-y-3 mb-6">
+                {/* Chỉ hiển thị trạng thái tiếp theo */}
+                {nextStatus && (
+                  <>
+                    <p className="text-sm text-gray-600">
+                      Chuyển sang trạng thái:
+                    </p>
+                    {(() => {
+                      const config = getStatusConfig(nextStatus);
+                      const Icon = config.icon;
+                      return (
+                        <label
+                          className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                            selectedStatus === nextStatus
+                              ? config.borderColor + " " + config.bgColor
+                              : "border-gray-200 hover:border-gray-300"
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="status"
+                            value={nextStatus}
+                            checked={selectedStatus === nextStatus}
+                            onChange={(e) => setSelectedStatus(e.target.value)}
+                            className="mr-3"
+                          />
+                          <Icon
+                            className={`w-5 h-5 mr-3 ${
+                              selectedStatus === nextStatus
+                                ? config.textColor
+                                : "text-gray-400"
+                            }`}
+                          />
+                          <span
+                            className={`font-medium ${
+                              selectedStatus === nextStatus
+                                ? config.textColor
+                                : "text-gray-700"
+                            }`}
+                          >
+                            {config.text}
+                          </span>
+                        </label>
+                      );
+                    })()}
+                  </>
+                )}
+
+                {/* Hoặc cho phép hủy đơn (nếu đơn chưa giao) */}
+                {order.status !== "delivered" &&
+                  order.status !== "cancelled" && (
+                    <>
+                      <p className="text-sm text-gray-600">Hoặc:</p>
+                      <label
+                        className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                          selectedStatus === "cancelled"
+                            ? "border-red-200 bg-red-50"
+                            : "border-gray-200 hover:border-gray-300"
                         }`}
                       >
-                        {config.text}
-                      </span>
-                    </label>
-                  );
-                })}
-
-                <label
-                  className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                    selectedStatus === "cancelled"
-                      ? "border-red-200 bg-red-50"
-                      : "border-gray-200 hover:border-gray-300"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="status"
-                    value="cancelled"
-                    checked={selectedStatus === "cancelled"}
-                    onChange={(e) => setSelectedStatus(e.target.value)}
-                    className="mr-3"
-                  />
-                  <XCircle
-                    className={`w-5 h-5 mr-3 ${
-                      selectedStatus === "cancelled"
-                        ? "text-red-600"
-                        : "text-gray-400"
-                    }`}
-                  />
-                  <span
-                    className={`font-medium ${
-                      selectedStatus === "cancelled"
-                        ? "text-red-800"
-                        : "text-gray-700"
-                    }`}
-                  >
-                    Hủy đơn hàng
-                  </span>
-                </label>
+                        <input
+                          type="radio"
+                          name="status"
+                          value="cancelled"
+                          checked={selectedStatus === "cancelled"}
+                          onChange={(e) => setSelectedStatus(e.target.value)}
+                          className="mr-3"
+                        />
+                        <XCircle
+                          className={`w-5 h-5 mr-3 ${
+                            selectedStatus === "cancelled"
+                              ? "text-red-600"
+                              : "text-gray-400"
+                          }`}
+                        />
+                        <span
+                          className={`font-medium ${
+                            selectedStatus === "cancelled"
+                              ? "text-red-800"
+                              : "text-gray-700"
+                          }`}
+                        >
+                          Hủy đơn hàng
+                        </span>
+                      </label>
+                    </>
+                  )}
               </div>
 
               <div className="flex items-center space-x-3">

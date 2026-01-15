@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import { useAuthStore } from "../../store/authStore";
 import { formatPrice } from "../../data/mockData";
+import { orderAPI } from "../../services/api";
+import toast from "react-hot-toast";
 
 const CustomerDashboard = () => {
   const { user } = useAuthStore();
@@ -19,19 +21,59 @@ const CustomerDashboard = () => {
     completedOrders: 0,
     totalSpent: 0,
   });
+  const [recentOrders, setRecentOrders] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Real data from database - for customer@bachhoa.com
   useEffect(() => {
-    // Simulate API call with real data
-    setTimeout(() => {
-      setStats({
-        totalOrders: 1, // Real: 1 order placed
-        pendingOrders: 0, // Real: 0 pending orders
-        completedOrders: 1, // Real: 1 delivered order
-        totalSpent: 187000, // Real: 187,000đ spent
-      });
-    }, 1000);
-  }, []);
+    const fetchDashboardData = async () => {
+      try {
+        setIsLoading(true);
+
+        // Fetch all orders to calculate stats
+        const response = await orderAPI.getMyOrders({
+          limit: 100,
+          page: 1,
+          sortBy: 'createdAt',
+          sortOrder: 'desc'
+        });
+
+        if (response.data.status === 'success') {
+          const orders = response.data.data.orders;
+
+          // Calculate stats
+          const totalOrders = response.data.data.pagination.totalItems;
+          const pendingOrders = orders.filter(order =>
+            order.status === 'pending' || order.status === 'confirmed' || order.status === 'packing'
+          ).length;
+          const completedOrders = orders.filter(order =>
+            order.status === 'delivered'
+          ).length;
+          const totalSpent = orders.reduce((sum, order) =>
+            sum + Number(order.totalAmount || 0), 0
+          );
+
+          setStats({
+            totalOrders,
+            pendingOrders,
+            completedOrders,
+            totalSpent
+          });
+
+          // Set recent orders (top 3)
+          setRecentOrders(orders.slice(0, 3));
+        }
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+        toast.error('Không thể tải dữ liệu dashboard');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (user?.id) {
+      fetchDashboardData();
+    }
+  }, [user?.id]);
 
   const StatCard = ({
     title,
@@ -106,27 +148,35 @@ const CustomerDashboard = () => {
           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
             status === "pending"
               ? "bg-yellow-100 text-yellow-800"
-              : status === "processing"
+              : status === "confirmed"
               ? "bg-blue-100 text-blue-800"
+              : status === "packing"
+              ? "bg-indigo-100 text-indigo-800"
               : status === "shipping"
               ? "bg-purple-100 text-purple-800"
-              : status === "completed"
-              ? "bg-green-100 text-green-800"
               : status === "delivered"
               ? "bg-green-100 text-green-800"
+              : status === "cancelled"
+              ? "bg-red-100 text-red-800"
+              : status === "returned"
+              ? "bg-orange-100 text-orange-800"
               : "bg-gray-100 text-gray-800"
           }`}
         >
           {status === "pending"
             ? "Chờ xử lý"
-            : status === "processing"
-            ? "Đang xử lý"
+            : status === "confirmed"
+            ? "Đã xác nhận"
+            : status === "packing"
+            ? "Đang đóng gói"
             : status === "shipping"
             ? "Đang giao"
-            : status === "completed"
-            ? "Hoàn thành"
             : status === "delivered"
             ? "Đã giao"
+            : status === "cancelled"
+            ? "Đã hủy"
+            : status === "returned"
+            ? "Đã trả hàng"
             : status}
         </div>
         <p className="text-sm font-medium text-gray-900 mt-1">
@@ -164,7 +214,7 @@ const CustomerDashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           title="Tổng đơn hàng"
-          value={stats.totalOrders}
+          value={isLoading ? "..." : stats.totalOrders}
           icon={ShoppingCart}
           color="blue"
           link="/customer/orders"
@@ -172,7 +222,7 @@ const CustomerDashboard = () => {
         />
         <StatCard
           title="Đang xử lý"
-          value={stats.pendingOrders}
+          value={isLoading ? "..." : stats.pendingOrders}
           icon={Clock}
           color="yellow"
           link="/customer/orders?status=pending"
@@ -180,7 +230,7 @@ const CustomerDashboard = () => {
         />
         <StatCard
           title="Tổng chi tiêu"
-          value={formatPrice(stats.totalSpent)}
+          value={isLoading ? "..." : formatPrice(stats.totalSpent)}
           icon={CreditCard}
           color="green"
           description="Tổng số tiền đã chi"
@@ -232,13 +282,26 @@ const CustomerDashboard = () => {
             </Link>
           </div>
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-            <RecentOrder
-              id="ML1755847565747001"
-              status="delivered"
-              total={187000}
-              items={2}
-              date="Hôm nay"
-            />
+            {isLoading ? (
+              <div className="flex items-center justify-center p-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              </div>
+            ) : recentOrders.length > 0 ? (
+              recentOrders.map((order) => (
+                <RecentOrder
+                  key={order.id}
+                  id={order.orderNumber}
+                  status={order.status}
+                  total={order.totalAmount}
+                  items={order.items?.length || 0}
+                  date={new Date(order.createdAt).toLocaleDateString('vi-VN')}
+                />
+              ))
+            ) : (
+              <div className="p-8 text-center text-gray-500">
+                Bạn chưa có đơn hàng nào
+              </div>
+            )}
           </div>
         </div>
       </div>

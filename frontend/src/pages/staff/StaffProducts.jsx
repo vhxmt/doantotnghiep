@@ -257,20 +257,14 @@ const StaffProducts = () => {
           </div>
         </div>
 
-        <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-          <div className="flex items-center space-x-2 text-sm text-gray-500">
-            <BarChart3 className="w-4 h-4" />
-            <span>Đã bán: 0</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Link
-              to={`/products/${product.id}`}
-              className="btn btn-outline btn-sm flex items-center space-x-2"
-            >
-              <Eye className="w-4 h-4" />
-              <span>Xem</span>
-            </Link>
-          </div>
+        <div className="flex items-center justify-end pt-4 border-t border-gray-200">
+          <Link
+            to={`/products/${product.id}`}
+            className="btn btn-outline btn-sm flex items-center space-x-2"
+          >
+            <Eye className="w-4 h-4" />
+            <span>Xem</span>
+          </Link>
         </div>
       </div>
     );

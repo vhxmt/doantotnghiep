@@ -12,6 +12,8 @@ import {
   User,
 } from "lucide-react";
 import { useAuthStore } from "../../store/authStore";
+import { orderAPI, productsAPI } from "../../services/api";
+import toast from "react-hot-toast";
 
 const StaffDashboard = () => {
   const { user } = useAuthStore();
@@ -22,20 +24,86 @@ const StaffDashboard = () => {
     totalProducts: 0,
     lowStockProducts: 0,
   });
+  const [recentOrders, setRecentOrders] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Real data from database
   useEffect(() => {
-    // Simulate API call with real data
-    setTimeout(() => {
-      setStats({
-        todayOrders: 1, // Real: 1 order today
-        pendingOrders: 0, // Real: 0 pending orders
-        completedOrders: 1, // Real: 1 completed order (delivered)
-        totalProducts: 6, // Real: 6 products in database
-        lowStockProducts: 0, // Real: 0 low stock products (all have good stock)
-      });
-    }, 1000);
+    fetchDashboardData();
   }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      setIsLoading(true);
+
+      // Fetch orders
+      const ordersResponse = await orderAPI.getAllOrders({
+        page: 1,
+        limit: 100,
+        sortBy: 'created_at',
+        sortOrder: 'desc'
+      });
+
+      if (ordersResponse.data.status === 'success') {
+        const orders = ordersResponse.data.data.orders;
+
+        // Calculate today's date at midnight
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // Calculate stats
+        const todayOrders = orders.filter(order => {
+          const orderDate = new Date(order.createdAt || order.created_at);
+          orderDate.setHours(0, 0, 0, 0);
+          return orderDate.getTime() === today.getTime();
+        }).length;
+
+        const pendingOrders = orders.filter(order =>
+          order.status === 'pending' ||
+          order.status === 'confirmed' ||
+          order.status === 'packing'
+        ).length;
+
+        const completedOrders = orders.filter(order =>
+          order.status === 'delivered'
+        ).length;
+
+        // Get recent orders (top 5)
+        setRecentOrders(orders.slice(0, 5));
+
+        setStats(prevStats => ({
+          ...prevStats,
+          todayOrders,
+          pendingOrders,
+          completedOrders
+        }));
+      }
+
+      // Fetch products
+      const productsResponse = await productsAPI.getProducts({
+        page: 1,
+        limit: 1000
+      });
+
+      if (productsResponse.data.status === 'success') {
+        const products = productsResponse.data.data.products;
+        const totalProducts = productsResponse.data.data.pagination.totalItems;
+        const lowStockProducts = products.filter(product =>
+          product.inventory?.quantity < 10
+        ).length;
+
+        setStats(prevStats => ({
+          ...prevStats,
+          totalProducts,
+          lowStockProducts
+        }));
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+      toast.error('Không thể tải dữ liệu dashboard');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const StatCard = ({
     title,
@@ -94,43 +162,73 @@ const StaffDashboard = () => {
     </Link>
   );
 
-  const RecentOrder = ({ id, customer, status, total, time }) => (
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(price);
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const orderDate = new Date(date);
+    orderDate.setHours(0, 0, 0, 0);
+
+    if (orderDate.getTime() === today.getTime()) {
+      return "Hôm nay";
+    }
+    return date.toLocaleDateString('vi-VN');
+  };
+
+  const RecentOrder = ({ order }) => (
     <div className="flex items-center justify-between p-4 border-b border-gray-100 last:border-b-0">
       <div className="flex items-center space-x-4">
         <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
           <User className="w-5 h-5 text-gray-600" />
         </div>
         <div>
-          <p className="font-medium text-gray-900">#{id}</p>
-          <p className="text-sm text-gray-600">{customer}</p>
+          <p className="font-medium text-gray-900">#{order.orderNumber}</p>
+          <p className="text-sm text-gray-600">
+            {order.user?.firstName} {order.user?.lastName}
+          </p>
         </div>
       </div>
       <div className="text-right">
         <div
           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-            status === "pending"
+            order.status === "pending"
               ? "bg-yellow-100 text-yellow-800"
-              : status === "processing"
+              : order.status === "confirmed"
               ? "bg-blue-100 text-blue-800"
-              : status === "completed"
+              : order.status === "packing"
+              ? "bg-indigo-100 text-indigo-800"
+              : order.status === "shipping"
+              ? "bg-purple-100 text-purple-800"
+              : order.status === "delivered"
               ? "bg-green-100 text-green-800"
-              : status === "delivered"
-              ? "bg-green-100 text-green-800"
+              : order.status === "cancelled"
+              ? "bg-red-100 text-red-800"
               : "bg-gray-100 text-gray-800"
           }`}
         >
-          {status === "pending"
+          {order.status === "pending"
             ? "Chờ xử lý"
-            : status === "processing"
-            ? "Đang xử lý"
-            : status === "completed"
-            ? "Hoàn thành"
-            : status === "delivered"
+            : order.status === "confirmed"
+            ? "Đã xác nhận"
+            : order.status === "packing"
+            ? "Đang đóng gói"
+            : order.status === "shipping"
+            ? "Đang giao"
+            : order.status === "delivered"
             ? "Đã giao"
-            : status}
+            : order.status === "cancelled"
+            ? "Đã hủy"
+            : order.status}
         </div>
-        <p className="text-sm text-gray-600 mt-1">{total}</p>
-        <p className="text-xs text-gray-500">{time}</p>
+        <p className="text-sm text-gray-600 mt-1">{formatPrice(order.totalAmount)}</p>
+        <p className="text-xs text-gray-500">{formatDate(order.createdAt || order.created_at)}</p>
       </div>
     </div>
   );
@@ -149,7 +247,7 @@ const StaffDashboard = () => {
         </div>
         <div className="flex space-x-3">
           <Link
-            to="/staff/orders/create"
+            to="/staff/create-order"
             className="btn btn-primary flex items-center space-x-2"
           >
             <Plus className="w-4 h-4" />
@@ -162,7 +260,7 @@ const StaffDashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           title="Đơn hàng hôm nay"
-          value={stats.todayOrders}
+          value={isLoading ? "..." : stats.todayOrders}
           icon={ShoppingCart}
           color="blue"
           link="/staff/orders"
@@ -170,7 +268,7 @@ const StaffDashboard = () => {
         />
         <StatCard
           title="Chờ xử lý"
-          value={stats.pendingOrders}
+          value={isLoading ? "..." : stats.pendingOrders}
           icon={Clock}
           color="yellow"
           link="/staff/orders?status=pending"
@@ -178,15 +276,15 @@ const StaffDashboard = () => {
         />
         <StatCard
           title="Đã hoàn thành"
-          value={stats.completedOrders}
+          value={isLoading ? "..." : stats.completedOrders}
           icon={CheckCircle}
           color="green"
-          link="/staff/orders?status=completed"
-          description="Đơn hàng hoàn thành hôm nay"
+          link="/staff/orders?status=delivered"
+          description="Đơn hàng đã giao"
         />
         <StatCard
           title="Sản phẩm sắp hết"
-          value={stats.lowStockProducts}
+          value={isLoading ? "..." : stats.lowStockProducts}
           icon={AlertCircle}
           color="red"
           link="/staff/products?filter=low-stock"
@@ -205,7 +303,7 @@ const StaffDashboard = () => {
               title="Tạo đơn hàng mới"
               description="Tạo đơn hàng cho khách hàng"
               icon={Plus}
-              link="/staff/orders/create"
+              link="/staff/create-order"
               color="green"
             />
             <QuickAction
@@ -246,13 +344,19 @@ const StaffDashboard = () => {
             </Link>
           </div>
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-            <RecentOrder
-              id="ML1755847565747001"
-              customer="Khách Hàng"
-              status="delivered"
-              total="187,000đ"
-              time="Hôm nay"
-            />
+            {isLoading ? (
+              <div className="flex items-center justify-center p-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              </div>
+            ) : recentOrders.length > 0 ? (
+              recentOrders.map((order) => (
+                <RecentOrder key={order.id} order={order} />
+              ))
+            ) : (
+              <div className="p-8 text-center text-gray-500">
+                Chưa có đơn hàng nào
+              </div>
+            )}
           </div>
         </div>
       </div>

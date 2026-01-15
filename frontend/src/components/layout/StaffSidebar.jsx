@@ -29,7 +29,7 @@ const StaffSidebar = ({ onClose }) => {
     },
     {
       label: "Tạo đơn hàng",
-      path: "/staff/orders/create",
+      path: "/staff/create-order",
       icon: Plus,
     },
     {

@@ -378,6 +378,54 @@ export const getAllReviews = catchAsync(async (req, res) => {
 });
 
 /**
+ * Update review status (Admin)
+ */
+export const updateReviewStatus = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  // Validate status
+  if (!['pending', 'approved', 'rejected'].includes(status)) {
+    return res.status(400).json({
+      status: "error",
+      message: "Invalid status. Must be one of: pending, approved, rejected",
+    });
+  }
+
+  const review = await Review.findByPk(id);
+  if (!review) {
+    return res.status(404).json({
+      status: "error",
+      message: "Review not found",
+    });
+  }
+
+  review.status = status;
+  await review.save();
+
+  const updatedReview = await Review.findByPk(id, {
+    include: [
+      {
+        model: User,
+        as: "user",
+        attributes: ["id", "firstName", "lastName", "email", "avatar"],
+      },
+      {
+        model: Product,
+        as: "product",
+        attributes: ["id", "name", "slug"],
+      },
+    ],
+  });
+
+  res.json({
+    status: "success",
+    message: `Review ${status} successfully`,
+    data: { review: updatedReview },
+  });
+});
+
+/**
  * Delete review (Admin)
  */
 export const adminDeleteReview = catchAsync(async (req, res) => {

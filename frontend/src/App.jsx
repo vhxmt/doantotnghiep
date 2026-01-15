@@ -154,8 +154,8 @@ function App() {
         >
           <Route index element={<StaffDashboard />} />
           <Route path="orders" element={<StaffOrders />} />
-          <Route path="orders/create" element={<StaffCreateOrder />} />
           <Route path="orders/:id" element={<StaffOrderDetail />} />
+          <Route path="create-order" element={<StaffCreateOrder />} />
           <Route path="products" element={<StaffProducts />} />
           <Route path="profile" element={<StaffProfile />} />
         </Route>

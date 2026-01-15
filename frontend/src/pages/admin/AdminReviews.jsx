@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Star, Trash2, Search } from 'lucide-react'
+import { Star, Trash2, Search, Check, X } from 'lucide-react'
 import { reviewAPI } from '../../services/api'
 import toast from 'react-hot-toast'
 
@@ -41,9 +41,20 @@ const AdminReviews = () => {
     }
   }
 
+  const handleUpdateStatus = async (id, status) => {
+    try {
+      await reviewAPI.updateReviewStatus(id, status)
+      const statusText = status === 'approved' ? 'duyệt' : status === 'rejected' ? 'từ chối' : 'cập nhật'
+      toast.success(`${statusText.charAt(0).toUpperCase() + statusText.slice(1)} đánh giá thành công`)
+      loadReviews()
+    } catch (error) {
+      toast.error('Không thể cập nhật trạng thái')
+    }
+  }
+
   const handleDelete = async (id) => {
     if (!confirm('Bạn có chắc chắn muốn xóa đánh giá này?')) return
-    
+
     try {
       await reviewAPI.adminDeleteReview(id)
       toast.success('Xóa đánh giá thành công')
@@ -55,15 +66,24 @@ const AdminReviews = () => {
 
   const getStatusBadge = (status) => {
     const config = {
-      pending: { color: 'yellow', text: 'Chờ duyệt' },
-      approved: { color: 'green', text: 'Đã duyệt' },
-      rejected: { color: 'red', text: 'Từ chối' }
+      pending: {
+        className: 'bg-yellow-100 text-yellow-800',
+        text: 'Chờ duyệt'
+      },
+      approved: {
+        className: 'bg-green-100 text-green-800',
+        text: 'Đã duyệt'
+      },
+      rejected: {
+        className: 'bg-red-100 text-red-800',
+        text: 'Từ chối'
+      }
     }
 
-    const { color, text } = config[status] || config.pending
+    const { className, text } = config[status] || config.pending
 
     return (
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-${color}-100 text-${color}-800`}>
+      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${className}`}>
         {text}
       </span>
     )
@@ -210,6 +230,24 @@ const AdminReviews = () => {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
+                        {review.status !== 'approved' && (
+                          <button
+                            onClick={() => handleUpdateStatus(review.id, 'approved')}
+                            className="p-2 text-green-600 hover:text-green-900 hover:bg-green-50 rounded-lg transition-colors"
+                            title="Duyệt"
+                          >
+                            <Check className="w-4 h-4" />
+                          </button>
+                        )}
+                        {review.status !== 'rejected' && (
+                          <button
+                            onClick={() => handleUpdateStatus(review.id, 'rejected')}
+                            className="p-2 text-orange-600 hover:text-orange-900 hover:bg-orange-50 rounded-lg transition-colors"
+                            title="Từ chối"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
                         <button
                           onClick={() => handleDelete(review.id)}
                           className="p-2 text-red-600 hover:text-red-900 hover:bg-red-50 rounded-lg transition-colors"

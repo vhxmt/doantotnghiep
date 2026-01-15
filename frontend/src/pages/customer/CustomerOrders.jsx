@@ -106,10 +106,12 @@ const CustomerOrders = () => {
   const getStatusBadge = (status) => {
     const statusConfig = {
       pending: { color: "yellow", text: "Chờ xử lý", icon: Clock },
-      processing: { color: "blue", text: "Đang xử lý", icon: Package },
+      confirmed: { color: "blue", text: "Đã xác nhận", icon: CheckCircle },
+      packing: { color: "indigo", text: "Đang đóng gói", icon: Package },
       shipping: { color: "purple", text: "Đang giao", icon: Truck },
       delivered: { color: "green", text: "Đã giao", icon: CheckCircle },
       cancelled: { color: "red", text: "Đã hủy", icon: XCircle },
+      returned: { color: "orange", text: "Đã trả hàng", icon: XCircle },
     };
 
     const config = statusConfig[status] || statusConfig.pending;

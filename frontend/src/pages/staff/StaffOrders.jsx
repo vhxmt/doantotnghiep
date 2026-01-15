@@ -102,9 +102,25 @@ const StaffOrders = () => {
     }
   };
 
+  const statusFlow = [
+    "pending",
+    "confirmed",
+    "packing",
+    "shipping",
+    "delivered",
+  ];
+
+  const getNextStatusForOrder = (currentStatus) => {
+    const currentIndex = statusFlow.indexOf(currentStatus);
+    if (currentIndex === -1 || currentIndex >= statusFlow.length - 1)
+      return null;
+    return statusFlow[currentIndex + 1];
+  };
+
   const openStatusModal = (orderId, currentStatus) => {
     setSelectedOrderId(orderId);
-    setSelectedStatus(currentStatus);
+    const nextStatus = getNextStatusForOrder(currentStatus);
+    setSelectedStatus(nextStatus || currentStatus);
     setIsStatusModalOpen(true);
   };
 
@@ -428,7 +444,7 @@ const StaffOrders = () => {
           </p>
         </div>
         <Link
-          to="/staff/orders/create"
+          to="/staff/create-order"
           className="btn btn-primary flex items-center space-x-2"
         >
           <Plus className="w-4 h-4" />
@@ -462,7 +478,8 @@ const StaffOrders = () => {
             >
               <option value="">Tất cả trạng thái</option>
               <option value="pending">Chờ xử lý</option>
-              <option value="processing">Đang xử lý</option>
+              <option value="confirmed">Đã xác nhận</option>
+              <option value="packing">Đang đóng gói</option>
               <option value="shipping">Đang giao</option>
               <option value="delivered">Đã giao</option>
               <option value="cancelled">Đã hủy</option>
@@ -472,7 +489,18 @@ const StaffOrders = () => {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <div className="flex items-center">
+            <ShoppingCart className="w-8 h-8 text-gray-600" />
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-600">Tổng đơn</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {orders.length}
+              </p>
+            </div>
+          </div>
+        </div>
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
           <div className="flex items-center">
             <Clock className="w-8 h-8 text-yellow-600" />
@@ -486,11 +514,22 @@ const StaffOrders = () => {
         </div>
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
           <div className="flex items-center">
-            <Package className="w-8 h-8 text-blue-600" />
+            <CheckCircle className="w-8 h-8 text-blue-600" />
             <div className="ml-3">
-              <p className="text-sm font-medium text-gray-600">Đang xử lý</p>
+              <p className="text-sm font-medium text-gray-600">Đã xác nhận</p>
               <p className="text-2xl font-bold text-gray-900">
-                {orders.filter((o) => o.status === "processing").length}
+                {orders.filter((o) => o.status === "confirmed").length}
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <div className="flex items-center">
+            <Package className="w-8 h-8 text-indigo-600" />
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-600">Đang đóng gói</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {orders.filter((o) => o.status === "packing").length}
               </p>
             </div>
           </div>
@@ -510,9 +549,20 @@ const StaffOrders = () => {
           <div className="flex items-center">
             <CheckCircle className="w-8 h-8 text-green-600" />
             <div className="ml-3">
-              <p className="text-sm font-medium text-gray-600">Hoàn thành</p>
+              <p className="text-sm font-medium text-gray-600">Đã giao</p>
               <p className="text-2xl font-bold text-gray-900">
                 {orders.filter((o) => o.status === "delivered").length}
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <div className="flex items-center">
+            <XCircle className="w-8 h-8 text-red-600" />
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-600">Đã hủy</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {orders.filter((o) => o.status === "cancelled").length}
               </p>
             </div>
           </div>
@@ -545,63 +595,108 @@ const StaffOrders = () => {
               Cập nhật trạng thái đơn hàng
             </h3>
 
-            <div className="space-y-3 mb-6">
-              {[
-                "pending",
-                "confirmed",
-                "packing",
-                "shipping",
-                "delivered",
-                "cancelled",
-              ].map((status) => {
-                const config = getStatusConfig(status);
-                const Icon = config.icon;
-                const isSelected = selectedStatus === status;
-                const currentOrder = orders.find(
-                  (o) => o.id === selectedOrderId
-                );
-                const isCurrent = currentOrder?.status === status;
+            {/* Hiển thị trạng thái hiện tại */}
+            {(() => {
+              const currentOrder = orders.find((o) => o.id === selectedOrderId);
+              if (!currentOrder) return null;
+              const config = getStatusConfig(currentOrder.status);
+              const Icon = config.icon;
+              return (
+                <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                  <p className="text-sm text-gray-600 mb-1">
+                    Trạng thái hiện tại:
+                  </p>
+                  <div className="flex items-center">
+                    <Icon className={`w-5 h-5 mr-2 ${config.textColor}`} />
+                    <span className={`font-medium ${config.textColor}`}>
+                      {config.text}
+                    </span>
+                  </div>
+                </div>
+              );
+            })()}
 
-                return (
-                  <button
-                    key={status}
-                    onClick={() => setSelectedStatus(status)}
-                    disabled={isCurrent}
-                    className={`w-full flex items-center justify-between p-4 rounded-lg border-2 transition-all ${
-                      isSelected
-                        ? `${config.bgColor} border-${config.color}-500`
-                        : isCurrent
-                        ? "bg-gray-50 border-gray-300 cursor-not-allowed"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div
-                        className={`w-10 h-10 rounded-full ${config.bgColor} flex items-center justify-center`}
+            <div className="space-y-3 mb-6">
+              {/* Chỉ hiển thị trạng thái tiếp theo */}
+              {(() => {
+                const currentOrder = orders.find((o) => o.id === selectedOrderId);
+                if (!currentOrder) return null;
+                const nextStatus = getNextStatusForOrder(currentOrder.status);
+
+                if (nextStatus) {
+                  const config = getStatusConfig(nextStatus);
+                  const Icon = config.icon;
+                  return (
+                    <>
+                      <p className="text-sm text-gray-600">
+                        Chuyển sang trạng thái:
+                      </p>
+                      <button
+                        onClick={() => setSelectedStatus(nextStatus)}
+                        className={`w-full flex items-center justify-between p-4 rounded-lg border-2 transition-all ${
+                          selectedStatus === nextStatus
+                            ? `${config.bgColor} border-${config.color}-500`
+                            : "border-gray-200 hover:border-gray-300"
+                        }`}
                       >
-                        <Icon className={`w-5 h-5 ${config.textColor}`} />
-                      </div>
-                      <div className="text-left">
-                        <p
-                          className={`font-medium ${
-                            isSelected ? config.textColor : "text-gray-900"
-                          }`}
-                        >
-                          {config.text}
-                        </p>
-                        {isCurrent && (
-                          <p className="text-xs text-gray-500">
-                            Trạng thái hiện tại
-                          </p>
+                        <div className="flex items-center space-x-3">
+                          <div
+                            className={`w-10 h-10 rounded-full ${config.bgColor} flex items-center justify-center`}
+                          >
+                            <Icon className={`w-5 h-5 ${config.textColor}`} />
+                          </div>
+                          <div className="text-left">
+                            <p className={`font-medium ${config.textColor}`}>
+                              {config.text}
+                            </p>
+                          </div>
+                        </div>
+                        {selectedStatus === nextStatus && (
+                          <CheckCircle className={`w-5 h-5 ${config.textColor}`} />
                         )}
+                      </button>
+                    </>
+                  );
+                }
+                return null;
+              })()}
+
+              {/* Hoặc cho phép hủy đơn (nếu đơn chưa giao) */}
+              {(() => {
+                const currentOrder = orders.find((o) => o.id === selectedOrderId);
+                if (!currentOrder || currentOrder.status === "delivered" || currentOrder.status === "cancelled") {
+                  return null;
+                }
+                const config = getStatusConfig("cancelled");
+                const Icon = config.icon;
+                return (
+                  <>
+                    <p className="text-sm text-gray-600">Hoặc:</p>
+                    <button
+                      onClick={() => setSelectedStatus("cancelled")}
+                      className={`w-full flex items-center justify-between p-4 rounded-lg border-2 transition-all ${
+                        selectedStatus === "cancelled"
+                          ? "bg-red-50 border-red-500"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                          <Icon className="w-5 h-5 text-red-600" />
+                        </div>
+                        <div className="text-left">
+                          <p className={`font-medium ${selectedStatus === "cancelled" ? "text-red-800" : "text-gray-900"}`}>
+                            Hủy đơn hàng
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                    {isSelected && (
-                      <CheckCircle className={`w-5 h-5 ${config.textColor}`} />
-                    )}
-                  </button>
+                      {selectedStatus === "cancelled" && (
+                        <CheckCircle className="w-5 h-5 text-red-600" />
+                      )}
+                    </button>
+                  </>
                 );
-              })}
+              })()}
             </div>
 
             <div className="flex items-center space-x-3">
