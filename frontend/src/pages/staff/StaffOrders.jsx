@@ -21,34 +21,43 @@ import { formatPrice } from "../../data/mockData";
 import { orderAPI } from "../../services/api";
 import toast from "react-hot-toast";
 
-const StaffOrders = () => {
+const StaffOrders = () => {// funtion component để xây dựng giao diện, xử lý logic cho chức năng staff quản lý đơn
+  // toàn bộ state qly đơn hàng sẽ dc đặt trong component
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  // true khi component dc render, 
+  // false: sau khi api trả dữ liệu 
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [sortBy, setSortBy] = useState("created_at");
   const [sortOrder, setSortOrder] = useState("desc");
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+  // quản lý việc hiển thị modal cập nhật trạng thái đơn
+  // khi admin nhấn nút chỉnh sửa trạng thái,state này bật lên(true)
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState("");
+  // lưu trạng thái mới mà staff lựa chọn trong modal
   const [isUpdating, setIsUpdating] = useState(false);
-
+// quản lý trạng thái trogg quá trình cập nhật đơn 
   useEffect(() => {
     fetchOrders();
   }, [sortBy, sortOrder]);
 
-  const fetchOrders = async () => {
+  const fetchOrders = async () => {// fetchOrder giao tiếp be
     try {
       setIsLoading(true);
 
       // Fetch orders from API
       const response = await orderAPI.getAllOrders({
+        // gọi api truyền vào các tham số (phân trang, sắp xếp)
+        // cho be trả về dữ liệu đã sắp xếp đúng theo lựa chọn của staff 
+        // đẩy logic sắp xếp về be
         page: 1,
         limit: 100,
         sortBy,
         sortOrder,
       });
-
+      // be đã trả về data ch, nếu ch thì fallback về mảng rỗng ,đảm bảo an toàn dữ liệu
       const apiOrders = response.data.data.orders || [];
 
       // Transform API data to match component structure
@@ -79,7 +88,7 @@ const StaffOrders = () => {
           })) || [],
       }));
 
-      setOrders(transformedOrders);
+      setOrders(transformedOrders);// cập nhật state orders để re-render giao diện với dữ liệu mới
     } catch (error) {
       console.error("Failed to fetch orders:", error);
       toast.error("Không thể tải danh sách đơn hàng");
@@ -92,7 +101,9 @@ const StaffOrders = () => {
     try {
       await orderAPI.updateOrderStatus(orderId, newStatus);
       setOrders(
-        orders.map((order) =>
+        orders.map((order) => // dùng map để duyệt qua mảng các đơn hàng
+        // đơn hàng có id trùng với orderId thì mới thay đổi trạng thái
+        // các đơn hàng khác sữ giữ nguyên 
           order.id === orderId ? { ...order, status: newStatus } : order
         )
       );

@@ -18,7 +18,7 @@ import { formatPrice } from "../../data/mockData";
 import { productsAPI } from "../../services/api";
 import toast from "react-hot-toast";
 
-const StaffProducts = () => {
+const StaffProducts = () => {// funtion component để xây dựng giao diện, xử lý logic cho chức năng quản lý trạng thái sản phẩm 
   const { products, categories, isLoading, fetchProducts, fetchCategories } =
     useProductStore();
 
@@ -35,8 +35,10 @@ const StaffProducts = () => {
     fetchCategories();
   }, [fetchProducts, fetchCategories]);
 
+
+// filteredProducts là biến chứa danh sách sản phẩm đã được lọc”
   const filteredProducts = products.filter((product) => {
-    const matchesSearch =
+    const matchesSearch = // lọc theo tên, sku
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.sku.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory =
@@ -44,34 +46,38 @@ const StaffProducts = () => {
       product.categories?.some((cat) => cat.id.toString() === selectedCategory);
     const matchesStatus = !statusFilter || product.status === statusFilter;
 
-    let matchesStock = true;
-    if (stockFilter === "low") {
-      matchesStock =
-        product.inventory?.quantity <=
+    // lọc sp theo tình trạng tồn kho 
+    let matchesStock = true;// đảm bảo ko sd bộ lọc -> hiển thị tất cả sp 
+
+    if (stockFilter === "low") {// khi nvien chọn bộ lọc sắp hết hang 
+      matchesStock = // ss số lượng tồn kho với ngưỡng cảnh báo
+        product.inventory?.quantity <= 
         (product.inventory?.lowStockThreshold || 10);
-    } else if (stockFilter === "out") {
+      } 
+    else if (stockFilter === "out") {
       matchesStock = product.inventory?.quantity === 0;
-    } else if (stockFilter === "in") {
+    }
+     else if (stockFilter === "in") {
       matchesStock = product.inventory?.quantity > 0;
     }
 
     return matchesSearch && matchesCategory && matchesStatus && matchesStock;
   });
-
+   // sắp xếp ds sản phẩm sau khi lọc
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     let aValue = a[sortBy];
     let bValue = b[sortBy];
 
     if (sortBy === "price") {
-      aValue = parseFloat(aValue);
+      aValue = parseFloat(aValue); // đổi kiểu string -> number 
       bValue = parseFloat(bValue);
     } else if (sortBy === "stock") {
       aValue = a.inventory?.quantity || 0;
       bValue = b.inventory?.quantity || 0;
     }
 
-    if (sortOrder === "asc") {
-      return aValue > bValue ? 1 : -1;
+    if (sortOrder === "asc") { 
+      return aValue > bValue ? 1 : -1; 
     } else {
       return aValue < bValue ? 1 : -1;
     }

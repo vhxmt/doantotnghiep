@@ -83,13 +83,13 @@ const AdminProducts = () => {
       try {
         await deleteProduct(productId);
         // The store now handles toast messages, so we might not need one here
-        // toast.success('Sản phẩm đã được xóa thành công');
+         toast.success('Sản phẩm đã được xóa thành công');
         // The store also handles removing the product from the list, so a manual refetch might be optional
         // but good for consistency.
         fetchProducts();
       } catch (error) {
         // The store now handles error toasts
-        // toast.error('Không thể xóa sản phẩm.');
+         toast.error('Không thể xóa sản phẩm.');
         console.error("Failed to delete product:", error);
       }
     }
