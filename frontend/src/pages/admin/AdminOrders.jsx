@@ -68,6 +68,7 @@ const AdminOrders = () => {
           created_at: order.createdAt || order.created_at,
           shippingAddress: addressString,
           paymentMethod: order.paymentMethod,
+          paymentStatus: order.paymentStatus,
         };
       });
 
@@ -141,42 +142,61 @@ const AdminOrders = () => {
     );
   };
 
-  const getPaymentMethodBadge = (method) => {
+  const getPaymentMethodBadge = (method, paymentStatus) => {
     const methodConfig = {
       cod: {
-        color: "gray",
         text: "💵 Tiền mặt",
         bgClass: "bg-gray-100",
         textClass: "text-gray-800",
       },
       vnpay: {
-        color: "blue",
         text: "💳 VNPAY",
         bgClass: "bg-blue-100",
         textClass: "text-blue-800",
       },
+      zalopay: {
+        text: "💳 ZaloPay",
+        bgClass: "bg-blue-100",
+        textClass: "text-blue-800",
+      },
+      stripe: {
+        text: "💳 Stripe",
+        bgClass: "bg-purple-100",
+        textClass: "text-purple-800",
+      },
       online: {
-        color: "green",
         text: "💳 Online",
         bgClass: "bg-green-100",
         textClass: "text-green-800",
       },
       bank: {
-        color: "green",
         text: "🏦 Chuyển khoản",
         bgClass: "bg-green-100",
         textClass: "text-green-800",
       },
     };
 
+    const statusConfig = {
+      unpaid: { text: "Chưa TT", color: "text-yellow-600" },
+      paid: { text: "Đã TT", color: "text-green-600" },
+      refunded: { text: "Hoàn tiền", color: "text-blue-600" },
+      failed: { text: "TT lỗi", color: "text-red-600" },
+    };
+
     const config = methodConfig[method] || methodConfig.cod;
+    const status = statusConfig[paymentStatus] || statusConfig.unpaid;
 
     return (
-      <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.bgClass} ${config.textClass}`}
-      >
-        {config.text}
-      </span>
+      <div className="space-y-1">
+        <span
+          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.bgClass} ${config.textClass}`}
+        >
+          {config.text}
+        </span>
+        <div className={`text-xs ${status.color}`}>
+          {paymentStatus === "paid" ? "✓ " : ""}{status.text}
+        </div>
+      </div>
     );
   };
 
@@ -224,7 +244,7 @@ const AdminOrders = () => {
         <div className="text-sm font-medium text-gray-900">
           {formatPrice(order.total)}
         </div>
-        {getPaymentMethodBadge(order.paymentMethod)}
+        {getPaymentMethodBadge(order.paymentMethod, order.paymentStatus)}
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
         {getStatusBadge(order.status)}

@@ -162,16 +162,34 @@ const StaffOrderDetail = () => {
   };
 
   const getPaymentStatusBadge = (status) => {
-    if (status === "paid") {
-      return (
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-          ✓ Đã thanh toán
-        </span>
-      );
-    }
+    const statusConfig = {
+      paid: {
+        text: "✓ Đã thanh toán",
+        bgClass: "bg-green-100",
+        textClass: "text-green-800",
+      },
+      unpaid: {
+        text: "⏳ Chưa thanh toán",
+        bgClass: "bg-yellow-100",
+        textClass: "text-yellow-800",
+      },
+      refunded: {
+        text: "↩ Đã hoàn tiền",
+        bgClass: "bg-blue-100",
+        textClass: "text-blue-800",
+      },
+      failed: {
+        text: "✗ Thanh toán thất bại",
+        bgClass: "bg-red-100",
+        textClass: "text-red-800",
+      },
+    };
+
+    const config = statusConfig[status] || statusConfig.unpaid;
+
     return (
-      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
-        ⏳ Chưa thanh toán
+      <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${config.bgClass} ${config.textClass}`}>
+        {config.text}
       </span>
     );
   };
@@ -487,7 +505,9 @@ const StaffOrderDetail = () => {
                 <p className="font-medium text-gray-900">
                   {order.paymentMethod === "cod" && "💵 Tiền mặt (COD)"}
                   {order.paymentMethod === "vnpay" && "💳 VNPAY"}
-                  {!["cod", "vnpay"].includes(order.paymentMethod) &&
+                  {order.paymentMethod === "zalopay" && "💳 ZaloPay"}
+                  {order.paymentMethod === "stripe" && "💳 Stripe"}
+                  {!["cod", "vnpay", "zalopay", "stripe"].includes(order.paymentMethod) &&
                     order.paymentMethod}
                 </p>
               </div>

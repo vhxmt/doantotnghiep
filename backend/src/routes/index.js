@@ -9,6 +9,7 @@ import couponRoutes from "./coupons.js";
 import statsRoutes from "./stats.js";
 import reviewRoutes from "./reviews.js";
 import vnpayRoutes from "./vnpay.js";
+import zalopayRoutes from "./zalopay.js";
 
 const router = express.Router();
 
@@ -36,6 +37,7 @@ router.use(`${API_VERSION}/coupons`, couponRoutes);
 router.use(`${API_VERSION}/stats`, statsRoutes);
 router.use(`${API_VERSION}/reviews`, reviewRoutes);
 router.use(`${API_VERSION}/vnpay`, vnpayRoutes);
+router.use(`${API_VERSION}/zalopay`, zalopayRoutes);
 
 // 404 handler for API routes
 router.use(`${API_VERSION}/*`, (req, res) => {

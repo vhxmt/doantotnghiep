@@ -243,6 +243,16 @@ const StaffOrders = () => {
         bgClass: "bg-blue-100",
         textClass: "text-blue-800",
       },
+      zalopay: {
+        text: "💳 ZaloPay",
+        bgClass: "bg-blue-100",
+        textClass: "text-blue-800",
+      },
+      stripe: {
+        text: "💳 Stripe",
+        bgClass: "bg-purple-100",
+        textClass: "text-purple-800",
+      },
       online: {
         text: "💳 Online",
         bgClass: "bg-green-100",
@@ -255,7 +265,15 @@ const StaffOrders = () => {
       },
     };
 
+    const statusConfig = {
+      unpaid: { text: "Chưa thanh toán", color: "text-yellow-600" },
+      paid: { text: "Đã thanh toán", color: "text-green-600" },
+      refunded: { text: "Đã hoàn tiền", color: "text-blue-600" },
+      failed: { text: "Thanh toán thất bại", color: "text-red-600" },
+    };
+
     const config = methodConfig[method] || methodConfig.cod;
+    const paymentStatus = statusConfig[status] || statusConfig.unpaid;
 
     return (
       <div className="space-y-1">
@@ -264,9 +282,9 @@ const StaffOrders = () => {
         >
           {config.text}
         </span>
-        {status === "paid" && (
-          <div className="text-xs text-green-600">✓ Đã thanh toán</div>
-        )}
+        <div className={`text-xs ${paymentStatus.color}`}>
+          {status === "paid" ? "✓ " : ""}{paymentStatus.text}
+        </div>
       </div>
     );
   };

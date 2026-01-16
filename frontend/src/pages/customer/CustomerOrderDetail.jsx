@@ -459,15 +459,26 @@ const CustomerOrderDetail = () => {
               <div className="flex items-center text-sm text-gray-600">
                 <CreditCard className="w-4 h-4 mr-2" />
                 <span>
-                  {order.paymentMethod === "cod" &&
-                    "💵 Thanh toán khi nhận hàng (COD)"}
+                  {order.paymentMethod === "cod" && "💵 Thanh toán khi nhận hàng (COD)"}
                   {order.paymentMethod === "vnpay" && "💳 Thanh toán VNPAY"}
-                  {!["cod", "vnpay"].includes(order.paymentMethod) &&
-                    "Thanh toán online"}
-                  {order.paymentStatus === "paid" && (
-                    <span className="text-green-600 ml-2">✓ Đã thanh toán</span>
-                  )}
+                  {order.paymentMethod === "zalopay" && "💳 Thanh toán ZaloPay"}
+                  {order.paymentMethod === "stripe" && "💳 Thanh toán Stripe"}
+                  {!["cod", "vnpay", "zalopay", "stripe"].includes(order.paymentMethod) && "Thanh toán online"}
                 </span>
+              </div>
+              <div className="flex items-center text-sm">
+                {order.paymentStatus === "paid" && (
+                  <span className="text-green-600">✓ Đã thanh toán</span>
+                )}
+                {order.paymentStatus === "unpaid" && (
+                  <span className="text-yellow-600">⏳ Chưa thanh toán</span>
+                )}
+                {order.paymentStatus === "refunded" && (
+                  <span className="text-blue-600">↩ Đã hoàn tiền</span>
+                )}
+                {order.paymentStatus === "failed" && (
+                  <span className="text-red-600">✗ Thanh toán thất bại</span>
+                )}
               </div>
             </div>
 

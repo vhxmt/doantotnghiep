@@ -537,7 +537,9 @@ const AdminOrderDetail = () => {
                 <p className="font-medium text-gray-900">
                   {order.paymentMethod === "cod" && "💵 Tiền mặt (COD)"}
                   {order.paymentMethod === "vnpay" && "💳 VNPAY"}
-                  {!["cod", "vnpay"].includes(order.paymentMethod) &&
+                  {order.paymentMethod === "zalopay" && "💳 ZaloPay"}
+                  {order.paymentMethod === "stripe" && "💳 Stripe"}
+                  {!["cod", "vnpay", "zalopay", "stripe"].includes(order.paymentMethod) &&
                     order.paymentMethod}
                 </p>
               </div>
@@ -546,13 +548,24 @@ const AdminOrderDetail = () => {
                   Trạng thái thanh toán:
                 </label>
                 <div className="mt-1">
-                  {order.paymentStatus === "paid" ? (
+                  {order.paymentStatus === "paid" && (
                     <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
                       ✓ Đã thanh toán
                     </span>
-                  ) : (
+                  )}
+                  {order.paymentStatus === "unpaid" && (
                     <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
                       ⏳ Chưa thanh toán
+                    </span>
+                  )}
+                  {order.paymentStatus === "refunded" && (
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                      ↩ Đã hoàn tiền
+                    </span>
+                  )}
+                  {order.paymentStatus === "failed" && (
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                      ✗ Thanh toán thất bại
                     </span>
                   )}
                 </div>

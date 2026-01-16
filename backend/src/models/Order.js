@@ -42,9 +42,19 @@ const Order = sequelize.define(
       field: "payment_status",
     },
     paymentMethod: {
-      type: DataTypes.ENUM("cod", "vnpay", "stripe"),
+      type: DataTypes.ENUM("cod", "vnpay", "stripe", "zalopay"),
       defaultValue: "cod",
       field: "payment_method",
+    },
+    paymentTransactionId: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+      field: "payment_transaction_id",
+    },
+    paidAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      field: "paid_at",
     },
     subtotal: {
       type: DataTypes.DECIMAL(10, 2),

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useCartStore } from "../../store/cartStore";
 import { useAuthStore } from "../../store/authStore";
 import { formatPrice } from "../../data/mockData";
-import { orderAPI } from "../../services/api";
+import { orderAPI, zalopayAPI } from "../../services/api";
 import {
   ArrowLeft,
   MapPin,
@@ -137,6 +137,40 @@ const CheckoutPage = () => {
         } else {
           console.error("No payment URL in response:", response.data);
           toast.error("Không thể tạo link thanh toán");
+        }
+        return;
+      }
+
+      // Handle ZaloPay payment
+      if (formData.paymentMethod === "zalopay") {
+        // First create the order with COD method (will update to zalopay after)
+        const createResponse = await orderAPI.createOrder({
+          ...orderData,
+          paymentMethod: "zalopay",
+        });
+        console.log("Order created:", createResponse.data);
+
+        const orderId = createResponse.data?.data?.order?.id;
+        if (!orderId) {
+          toast.error("Không thể tạo đơn hàng");
+          return;
+        }
+
+        // Create ZaloPay payment
+        const zalopayResponse = await zalopayAPI.createOrder(orderId);
+        console.log("ZaloPay order created:", zalopayResponse.data);
+
+        // Clear cart before redirecting to payment
+        clearCart();
+
+        // Redirect to ZaloPay payment page
+        const orderUrl = zalopayResponse.data?.data?.order_url;
+        if (orderUrl) {
+          console.log("Redirecting to ZaloPay:", orderUrl);
+          window.location.href = orderUrl;
+        } else {
+          console.error("No payment URL in response:", zalopayResponse.data);
+          toast.error("Không thể tạo link thanh toán ZaloPay");
         }
         return;
       }
@@ -353,7 +387,7 @@ const CheckoutPage = () => {
                 </div>
               </label>
 
-              <label className="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+              {/* <label className="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
                 <input
                   type="radio"
                   name="paymentMethod"
@@ -374,6 +408,31 @@ const CheckoutPage = () => {
                 <img
                   src="https://vnpay.vn/s1/statics.vnpay.vn/2023/9/06ncktiwd6dc1694418196384.png"
                   alt="VNPAY"
+                  className="h-8"
+                />
+              </label> */}
+
+              <label className="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="zalopay"
+                  checked={formData.paymentMethod === "zalopay"}
+                  onChange={handleInputChange}
+                  className="mr-4"
+                />
+                <CreditCard className="w-5 h-5 text-blue-600 mr-3" />
+                <div className="flex-1">
+                  <div className="font-medium text-gray-900">
+                    Thanh toán qua ZaloPay
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    Ví ZaloPay, Thẻ ATM, Visa, MasterCard
+                  </div>
+                </div>
+                <img
+                  src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-ZaloPay-Square.png"
+                  alt="ZaloPay"
                   className="h-8"
                 />
               </label>

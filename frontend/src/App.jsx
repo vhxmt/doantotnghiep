@@ -25,6 +25,7 @@ import ContactPage from "./pages/public/ContactPage";
 import TrackOrderPage from "./pages/public/TrackOrderPage";
 import PaymentSuccess from "./pages/public/PaymentSuccess";
 import PaymentFailure from "./pages/public/PaymentFailure";
+import CheckoutResult from "./pages/public/CheckoutResult";
 
 // Auth Pages
 import LoginPage from "./pages/auth/LoginPage";
@@ -116,6 +117,7 @@ function App() {
           <Route path="contact" element={<ContactPage />} />
           <Route path="payment/success" element={<PaymentSuccess />} />
           <Route path="payment/failure" element={<PaymentFailure />} />
+          <Route path="checkout/result" element={<CheckoutResult />} />
         </Route>
 
         {/* Auth Routes */}

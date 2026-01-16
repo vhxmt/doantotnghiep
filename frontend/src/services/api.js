@@ -272,6 +272,12 @@ export const orderAPI = {
   updateOrderInfo: (id, data) => api.patch(`/orders/${id}/info`, data),
 };
 
+// ZaloPay API
+export const zalopayAPI = {
+  createOrder: (orderId) => api.post("/zalopay/create-order", { orderId }),
+  queryOrder: (appTransId) => api.get(`/zalopay/query/${appTransId}`),
+};
+
 // Review API
 export const reviewAPI = {
   getProductReviews: (productId, params) =>
