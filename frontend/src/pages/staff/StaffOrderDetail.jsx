@@ -39,7 +39,7 @@ const StaffOrderDetail = () => {
       const response = await orderAPI.getOrder(id);
       const apiOrder = response.data.data.order;
 
-      // Transform API data
+      // Transform dữ liệu be trả về sang fe
       const transformedOrder = {
         id: apiOrder.id,
         orderNumber: apiOrder.orderNumber,
@@ -47,7 +47,7 @@ const StaffOrderDetail = () => {
         paymentStatus: apiOrder.paymentStatus,
         paymentMethod: apiOrder.paymentMethod,
         subtotal: parseFloat(apiOrder.subtotal),
-        shippingAmount: parseFloat(apiOrder.shippingAmount),
+        shippingAmount: parseFloat(apiOrder.shippingAmount),// string -> số thực
         discountAmount: parseFloat(apiOrder.discountAmount || 0),
         totalAmount: parseFloat(apiOrder.totalAmount),
         notes: apiOrder.notes,
