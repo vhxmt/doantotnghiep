@@ -187,3 +187,16 @@ Thumbs.db
 
 # Claude local settings
 .claude/
+# ======================
+# ENV FILES (IMPORTANT)
+# ======================
+.env
+backend/.env
+frontend/.env
+frontend/.env.local
+
+# ======================
+# UPLOAD FILES (RUNTIME)
+# ======================
+backend/uploads/
+!backend/uploads/.gitkeep
