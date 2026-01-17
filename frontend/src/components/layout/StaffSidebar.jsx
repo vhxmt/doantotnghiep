@@ -7,7 +7,6 @@ import {
   Plus,
   User,
   X,
-  Home,
 } from "lucide-react";
 import { cn } from "../../utils/cn";
 

@@ -12,7 +12,6 @@ import {
   FileText,
   Settings,
   X,
-  Home,
 } from "lucide-react";
 import { cn } from "../../utils/cn";
 
