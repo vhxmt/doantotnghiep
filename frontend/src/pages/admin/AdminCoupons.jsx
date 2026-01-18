@@ -70,7 +70,7 @@ const AdminCoupons = () => {
     try {
       await couponsAPI.createCoupon({
         ...formData,
-        value: parseFloat(formData.value),
+        value: parseFloat(formData.value), 
         minimumOrderAmount: formData.minOrderAmount ? parseFloat(formData.minOrderAmount) : null,
         maximumDiscountAmount: formData.maxDiscountAmount ? parseFloat(formData.maxDiscountAmount) : null,
         usageLimit: formData.usageLimit ? parseInt(formData.usageLimit) : null,
@@ -149,7 +149,7 @@ const AdminCoupons = () => {
 
   const openEditModal = (coupon) => {
     setEditingCoupon(coupon)
-    setFormData({
+    setFormData({// ảnh xạ dữ liệu cũ vào form chỉnh sửa 
       code: coupon.code,
       name: coupon.name,
       description: coupon.description,
@@ -229,7 +229,7 @@ const AdminCoupons = () => {
     )
   }
 
-  const formatDiscountValue = (type, value) => {
+  const formatDiscountValue = (type, value) => {// định dạng giá trị khuyến mãi 
     switch (type) {
       case 'percentage':
         return `${value}%`

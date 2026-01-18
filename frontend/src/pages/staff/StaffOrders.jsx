@@ -25,8 +25,9 @@ const StaffOrders = () => {// funtion component để xây dựng giao diện, x
   // toàn bộ state qly đơn hàng sẽ dc đặt trong component
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  // true khi component dc render, 
-  // false: sau khi api trả dữ liệu 
+  // true khi component render lần dầu, hệ thống chưa có dữ liệu
+  // chuẩn bị gọi api nên giao diện cần trạng thái loading để thông báo ng dùng là đang tải dữ liệu
+  // false: sau khi api trả dữ liệu thành công or thất bại
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [sortBy, setSortBy] = useState("created_at");
@@ -49,8 +50,8 @@ const StaffOrders = () => {// funtion component để xây dựng giao diện, x
 
       // Fetch orders from API
       const response = await orderAPI.getAllOrders({
-        // gọi api truyền vào các tham số (phân trang, sắp xếp)
-        // cho be trả về dữ liệu đã sắp xếp đúng theo lựa chọn của staff 
+        // Hàm fetchOrders dùng để gọi API backend lấy danh sách đơn hàng
+        //theo tiêu chí phân trang và sắp xếp 
         // đẩy logic sắp xếp về be
         page: 1,
         limit: 100,
@@ -93,6 +94,9 @@ const StaffOrders = () => {// funtion component để xây dựng giao diện, x
       console.error("Failed to fetch orders:", error);
       toast.error("Không thể tải danh sách đơn hàng");
     } finally {
+      // nếu ko tắt trạng thái loading: giao diện sẽ mãi ở trang thái loading
+      // bảng đơn hàng sẽ ko hiển thị dc
+      // người dùng hkhông thể tương tác dc với trang
       setIsLoading(false);
     }
   };
@@ -114,7 +118,7 @@ const StaffOrders = () => {// funtion component để xây dựng giao diện, x
   };
 
   const statusFlow = [
-    "pending",
+    "pending", 
     "confirmed",
     "packing",
     "shipping",
@@ -127,11 +131,19 @@ const StaffOrders = () => {// funtion component để xây dựng giao diện, x
       return null;
     return statusFlow[currentIndex + 1];
   };
-
+ // openStatusModal nhận tham số orderId và currentStatus
+ // để xác định đơn hàng nào cần cập nhật trạng thái
   const openStatusModal = (orderId, currentStatus) => {
-    setSelectedOrderId(orderId);
+    setSelectedOrderId(orderId); // lưu id đơn hàng đc chọn
+    // gọi hàm getNextStatusForOrder nhận tham số currentStatus
+    // để biết đc trạng thái cập nhật tiếp theo là gì dựa vào currenStatus
+    // trạng thái tiếp theo đó lưu vào nextStatus
     const nextStatus = getNextStatusForOrder(currentStatus);
+    // cập nhật lại state selectedStatus
+    // nếu nextStatus tồn tại thì gán nextStatus
+    // nếu ko tồn tại (đơn đã ở trạng thái cuối cùng) thì giữ nguyên currentStatus
     setSelectedStatus(nextStatus || currentStatus);
+    // mở modal cập nhật trạng thái cho staff cập nhật
     setIsStatusModalOpen(true);
   };
 

@@ -4,7 +4,7 @@ import { useAuthStore } from "../../store/authStore";
 import { Eye, EyeOff, CheckCircle } from "lucide-react";
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
 
-const LoginPage = () => {
+const LoginPage = () => {// dùng function component để xây dựng giao diện ,xử lý logic trang đăng nhâp
   const navigate = useNavigate();
   const location = useLocation();
   const { login, isLoading } = useAuthStore();

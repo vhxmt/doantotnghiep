@@ -19,8 +19,9 @@ import { productsAPI } from "../../services/api";
 import toast from "react-hot-toast";
 
 const StaffProducts = () => {// funtion component để xây dựng giao diện, xử lý logic cho chức năng quản lý trạng thái sản phẩm 
+  //Em lấy dữ liệu sản phẩm và danh mục từ store useProductStore để dùng chung cho nhiều màn hình.
   const { products, categories, isLoading, fetchProducts, fetchCategories } =
-    useProductStore();
+    useProductStore(); // lấy đata từ store
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -60,7 +61,7 @@ const StaffProducts = () => {// funtion component để xây dựng giao diện,
      else if (stockFilter === "in") {
       matchesStock = product.inventory?.quantity > 0;
     }
-
+   // đảm bảo sp chỉ hiển thị màn hình khi đáp ứng đủ 4 điều kiện loc 
     return matchesSearch && matchesCategory && matchesStatus && matchesStock;
   });
    // sắp xếp ds sản phẩm sau khi lọc

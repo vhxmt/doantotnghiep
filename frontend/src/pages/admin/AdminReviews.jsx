@@ -44,7 +44,10 @@ const AdminReviews = () => {
   const handleUpdateStatus = async (id, status) => {
     try {
       await reviewAPI.updateReviewStatus(id, status)
-      const statusText = status === 'approved' ? 'duyệt' : status === 'rejected' ? 'từ chối' : 'cập nhật'
+      const statusText = status === 'approved' ? 'duyệt' 
+      : status === 'rejected' 
+      ? 'từ chối' 
+      : 'cập nhật'
       toast.success(`${statusText.charAt(0).toUpperCase() + statusText.slice(1)} đánh giá thành công`)
       loadReviews()
     } catch (error) {
