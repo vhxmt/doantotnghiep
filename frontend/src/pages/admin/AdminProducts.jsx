@@ -32,7 +32,7 @@ const AdminProducts = () => {
   const [sortOrder, setSortOrder] = useState("asc");
 
   useEffect(() => {
-    // Admin xem tất cả sản phẩm (không filter status)
+   
     fetchProducts({ status: "" });
     fetchCategories();
   }, [fetchProducts, fetchCategories]);
@@ -79,13 +79,9 @@ const AdminProducts = () => {
     if (window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này không?")) {
       try {
         await deleteProduct(productId);
-        // The store now handles toast messages, so we might not need one here
          toast.success('Sản phẩm đã được xóa thành công');
-        // The store also handles removing the product from the list, so a manual refetch might be optional
-        // but good for consistency.
         fetchProducts();
       } catch (error) {
-        // The store now handles error toasts
          toast.error('Không thể xóa sản phẩm.');
         console.error("Failed to delete product:", error);
       }

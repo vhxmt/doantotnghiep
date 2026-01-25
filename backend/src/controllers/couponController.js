@@ -64,9 +64,7 @@ export const getCoupons = catchAsync(async (req, res) => {
   });
 });
 
-/**
- * Get coupon by ID
- */
+
 export const getCoupon = catchAsync(async (req, res) => {
   const { id } = req.params;
 
@@ -84,9 +82,7 @@ export const getCoupon = catchAsync(async (req, res) => {
   });
 });
 
-/**
- * Create new coupon
- */
+
 export const createCoupon = catchAsync(async (req, res) => {
   const {
     code,
@@ -136,9 +132,7 @@ export const createCoupon = catchAsync(async (req, res) => {
   });
 });
 
-/**
- * Update coupon
- */
+
 export const updateCoupon = catchAsync(async (req, res) => {
   const { id } = req.params;
   const {
@@ -161,7 +155,7 @@ export const updateCoupon = catchAsync(async (req, res) => {
     throw new NotFoundError('Coupon not found');
   }
 
-  // Validate dates
+  
   if (startDate && endDate && new Date(startDate) >= new Date(endDate)) {
     throw new ValidationError('Start date must be before end date');
   }
@@ -202,9 +196,7 @@ export const updateCoupon = catchAsync(async (req, res) => {
   });
 });
 
-/**
- * Delete coupon
- */
+
 export const deleteCoupon = catchAsync(async (req, res) => {
   const { id } = req.params;
 

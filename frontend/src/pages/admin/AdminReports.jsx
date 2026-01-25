@@ -13,6 +13,7 @@ import { statsAPI } from "../../services/api";
 import { formatPrice } from "../../data/mockData";
 import toast from "react-hot-toast";
 
+
 const AdminReports = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [dateRange, setDateRange] = useState("7days");

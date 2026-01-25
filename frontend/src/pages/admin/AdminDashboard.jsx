@@ -31,7 +31,7 @@ const AdminDashboard = () => {
   });
   const [loading, setLoading] = useState(true);
 
-  // Fetch real data from API
+  
   useEffect(() => {
     const fetchDashboardStats = async () => {
       try {

@@ -209,7 +209,7 @@ export const forgotPassword = catchAsync(async (req, res) => {
     try {
       await sendEmail({
         to: user.email,
-        subject: "Khôi phục mật khẩu - Bách Hóa Store",
+        subject: "Khôi phục mật khẩu - Memory Lane",
         template: "password-reset",
         data: {
           name: user.getFullName(),

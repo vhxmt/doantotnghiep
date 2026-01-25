@@ -59,8 +59,8 @@ const CustomerDashboard = () => {
             totalSpent
           });
 
-          // Set recent orders (top 3)
-          setRecentOrders(orders.slice(0, 3));
+          
+          setRecentOrders(orders.slice(0, 5));
         }
       } catch (error) {
         console.error('Error fetching dashboard data:', error);

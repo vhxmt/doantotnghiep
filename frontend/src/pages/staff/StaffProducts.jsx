@@ -28,8 +28,6 @@ const StaffProducts = () => {// funtion component để xây dựng giao diện,
     fetchCategories();
   }, [fetchProducts, fetchCategories]);
 
-
-// filteredProducts là biến chứa danh sách sản phẩm đã được lọc
   const filteredProducts = products.filter((product) => {
     const matchesSearch = // lọc theo tên, sku
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -82,7 +80,7 @@ const StaffProducts = () => {// funtion component để xây dựng giao diện,
 
   const handleStatusUpdate = async (productId, newStatus) => {
     try {
-      // Call API to update product status (staff endpoint)
+     
       await productsAPI.updateProductStatus(productId, newStatus);
 
       // Refresh products list

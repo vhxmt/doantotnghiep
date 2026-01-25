@@ -50,7 +50,7 @@ const AdminUsers = () => {
       const response = await usersAPI.getUsers({
         role: roleFilter || undefined,
         status: statusFilter || undefined,
-        limit: 100, // Lấy nhiều user để hiển thị
+        limit: 100, 
       });
       setUsers(response.data.data.users);
     } catch (error) {
@@ -65,7 +65,7 @@ const AdminUsers = () => {
     try {
       await usersAPI.updateUserStatus(userId, newStatus);
       toast.success("Cập nhật trạng thái thành công");
-      fetchUsers(); // Refresh data
+      fetchUsers(); 
     } catch (error) {
       console.error("Failed to update status:", error);
       toast.error(

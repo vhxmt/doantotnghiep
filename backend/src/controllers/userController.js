@@ -9,9 +9,7 @@ import uploadService from "../services/uploadService.js";
 import { Op } from "sequelize";
 import sequelize from "../database/config.js";
 
-/**
- * Get all users (Admin only)
- */
+
 export const getAllUsers = catchAsync(async (req, res) => {
   const { page = 1, limit = 10, status, role, search } = req.query;
 

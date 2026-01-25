@@ -39,7 +39,7 @@ const StaffOrderDetail = () => {
       const response = await orderAPI.getOrder(id);
       const apiOrder = response.data.data.order;
 
-      // Transform dữ liệu be trả về sang fe
+      
       const transformedOrder = {
         id: apiOrder.id,
         orderNumber: apiOrder.orderNumber,

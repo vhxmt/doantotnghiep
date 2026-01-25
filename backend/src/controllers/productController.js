@@ -530,7 +530,7 @@ export const updateProduct = catchAsync(async (req, res) => {
 export const deleteProduct = catchAsync(async (req, res) => {
   const { id } = req.params;
 
-  console.log("🗑️ Starting product deletion for ID:", id);
+  console.log(" Starting product deletion for ID:", id);
 
   const product = await Product.findByPk(id);
 
@@ -538,7 +538,7 @@ export const deleteProduct = catchAsync(async (req, res) => {
     throw new NotFoundError("Product not found");
   }
 
-  console.log("✅ Product found, starting deletion of related records...");
+  console.log(" Product found, starting deletion of related records...");
 
   // Delete all related data manually to avoid foreign key constraints
   // 1. Delete product images
@@ -587,9 +587,9 @@ export const deleteProduct = catchAsync(async (req, res) => {
     const deletedInventory = await Inventory.destroy({
       where: { productId: id },
     });
-    console.log(`✅ Deleted ${deletedInventory} inventory records`);
+    console.log(` Deleted ${deletedInventory} inventory records`);
   } catch (error) {
-    console.error("❌ Error deleting inventory:", error.message);
+    console.error(" Error deleting inventory:", error.message);
     throw error;
   }
 

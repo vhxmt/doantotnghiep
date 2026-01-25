@@ -10,30 +10,24 @@ import {
 import { Op } from "sequelize";
 import sequelize from "../database/config.js";
 
-/**
- * @desc    Get dashboard statistics
- * @route   GET /api/v1/stats/dashboard
- * @access  Private/Admin
- */
-export const getDashboardStats = catchAsync(async (req, res) => {
-  console.log("📊 Fetching dashboard statistics...");
 
-  // 1. Total Users (all users in the system)
+export const getDashboardStats = catchAsync(async (req, res) => {
+  console.log(" Fetching dashboard statistics...");
+
+  
   const totalUsers = await User.count({
     where: {
       status: "active",
     },
   });
 
-  // 2. Total Products
+  
   const totalProducts = await Product.count({
     where: { status: "active" },
   });
 
-  // 3. Total Orders
   const totalOrders = await Order.count();
 
-  // 4. Total Revenue (from delivered orders)
   const revenueResult = await Order.findOne({
     attributes: [
       [sequelize.fn("SUM", sequelize.col("total_amount")), "totalRevenue"],
@@ -157,11 +151,7 @@ export const getDashboardStats = catchAsync(async (req, res) => {
   });
 });
 
-/**
- * @desc    Get sales report by date range
- * @route   GET /api/v1/stats/sales
- * @access  Private/Admin
- */
+
 export const getSalesStats = catchAsync(async (req, res) => {
   const { startDate, endDate, groupBy = "day" } = req.query;
 
@@ -215,11 +205,7 @@ export const getSalesStats = catchAsync(async (req, res) => {
   });
 });
 
-/**
- * @desc    Get top selling products
- * @route   GET /api/v1/stats/top-products
- * @access  Private/Admin
- */
+
 export const getTopProducts = catchAsync(async (req, res) => {
   const { limit = 10 } = req.query;
 

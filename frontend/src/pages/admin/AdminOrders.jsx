@@ -85,7 +85,7 @@ const AdminOrders = () => {
     try {
       await orderAPI.updateOrderStatus(orderId, newStatus);
       toast.success("Cập nhật trạng thái thành công");
-      fetchOrders(); // Refresh data
+      fetchOrders(); 
     } catch (error) {
       toast.error("Không thể cập nhật trạng thái");
     }

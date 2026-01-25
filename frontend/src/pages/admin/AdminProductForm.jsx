@@ -33,7 +33,7 @@ const AdminProductForm = () => {
     status: "active",
     inventory: { quantity: 0 },
     categoryIds: [],
-    images: [], // Will store image objects { id, url }
+    images: [], 
   });
   const [imageFiles, setImageFiles] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -152,7 +152,7 @@ const AdminProductForm = () => {
           url: res.data.data.url,
         }));
 
-        console.log("✅ Uploaded images:", uploadedImages);
+        console.log(" Uploaded images:", uploadedImages);
 
         setFormData((prev) => ({
           ...prev,
@@ -174,7 +174,7 @@ const AdminProductForm = () => {
     // Combine existing images with newly uploaded ones
     const allImages = [...formData.images, ...uploadedImages];
 
-    console.log("📦 All images for submission:", allImages);
+    console.log(" All images for submission:", allImages);
 
     const submissionData = {
       ...formData,
@@ -185,8 +185,8 @@ const AdminProductForm = () => {
       imageIds: allImages.filter((img) => img.id).map((img) => img.id),
     };
 
-    console.log("📤 Submission data:", submissionData);
-    console.log("🖼️ Image IDs:", submissionData.imageIds);
+    console.log(" Submission data:", submissionData);
+    console.log(" Image IDs:", submissionData.imageIds);
 
     // Validate that we have at least some data
     if (submissionData.imageIds.length === 0) {
@@ -199,24 +199,24 @@ const AdminProductForm = () => {
 
     try {
       if (isEditMode) {
-        console.log("🔄 Updating product with data:", submissionData);
+        console.log(" Updating product with data:", submissionData);
         const result = await updateProduct(id, submissionData);
-        console.log("✅ Update result:", result);
+        console.log(" Update result:", result);
         toast.success("Cập nhật sản phẩm thành công!");
         // Small delay to ensure state is updated
         setTimeout(() => {
           navigate("/admin/products");
         }, 500);
       } else {
-        console.log("➕ Creating product with data:", submissionData);
+        console.log(" Creating product with data:", submissionData);
         const result = await createProduct(submissionData);
-        console.log("✅ Create result:", result);
+        console.log(" Create result:", result);
         toast.success("Thêm sản phẩm thành công!");
         navigate("/admin/products");
       }
     } catch (error) {
       // Error toast is handled in the store
-      console.error("❌ Failed to save product", error);
+      console.error(" Failed to save product", error);
       console.error("Error response:", error.response?.data);
       toast.error(
         "Lưu sản phẩm thất bại: " +
