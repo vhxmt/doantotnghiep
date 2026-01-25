@@ -28,36 +28,32 @@ const StaffProducts = () => {// funtion component để xây dựng giao diện,
     fetchCategories();
   }, [fetchProducts, fetchCategories]);
 
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch = // lọc theo tên, sku
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.sku.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory =
-      !selectedCategory ||
-      product.categories?.some((cat) => cat.id.toString() === selectedCategory);
+ const filteredProducts = products.filter((product) => {
+  const matchesSearch =
+    product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    product.sku.toLowerCase().includes(searchQuery.toLowerCase());
 
-    // lọc sp theo tình trạng tồn kho
-    let matchesStock = true;// đảm bảo ko sd bộ lọc -> hiển thị tất cả sp
+  const matchesCategory =
+    !selectedCategory ||
+    product.categories?.some(
+      (cat) => cat.id.toString() === selectedCategory
+    );
 
-    if (stockFilter === "low") {// khi nvien chọn bộ lọc sắp hết hang
-      matchesStock = // ss số lượng tồn kho với ngưỡng cảnh báo
-        product.inventory?.quantity <=
-        (product.inventory?.lowStockThreshold || 10);
-      }
-    else if (stockFilter === "out") {
-      matchesStock = product.inventory?.quantity === 0;
-    }
-     else if (stockFilter === "in") {
-      matchesStock = product.inventory?.quantity > 0;
-    }
-<<<<<<< HEAD
+  let matchesStock = true;
 
-    return matchesSearch && matchesCategory && matchesStock;
-=======
-   // đảm bảo sp chỉ hiển thị màn hình khi đáp ứng đủ 4 điều kiện loc 
-    return matchesSearch && matchesCategory && matchesStatus && matchesStock;
->>>>>>> 158c7c275ff7cea6225475c95c470c55b2133c71
-  });
+  if (stockFilter === "low") {
+    matchesStock =
+      product.inventory?.quantity <=
+      (product.inventory?.lowStockThreshold || 10);
+  } else if (stockFilter === "out") {
+    matchesStock = product.inventory?.quantity === 0;
+  } else if (stockFilter === "in") {
+    matchesStock = product.inventory?.quantity > 0;
+  }
+
+  return matchesSearch && matchesCategory && matchesStock;
+});
+
    // sắp xếp ds sản phẩm sau khi lọc
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     let aValue = a[sortBy];
