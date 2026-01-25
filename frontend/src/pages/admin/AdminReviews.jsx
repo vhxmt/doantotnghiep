@@ -39,6 +39,23 @@ const AdminReviews = () => {
     }
   }
 
+<<<<<<< HEAD
+=======
+  const handleUpdateStatus = async (id, status) => {
+    try {
+      await reviewAPI.updateReviewStatus(id, status)
+      const statusText = status === 'approved' ? 'duyệt' 
+      : status === 'rejected' 
+      ? 'từ chối' 
+      : 'cập nhật'
+      toast.success(`${statusText.charAt(0).toUpperCase() + statusText.slice(1)} đánh giá thành công`)
+      loadReviews()
+    } catch (error) {
+      toast.error('Không thể cập nhật trạng thái')
+    }
+  }
+
+>>>>>>> 158c7c275ff7cea6225475c95c470c55b2133c71
   const handleDelete = async (id) => {
     if (!confirm('Bạn có chắc chắn muốn xóa đánh giá này?')) return
 
