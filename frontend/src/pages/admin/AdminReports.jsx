@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
 import {
-  TrendingUp,
-  TrendingDown,
   DollarSign,
   ShoppingCart,
   Users,
@@ -74,10 +72,6 @@ const AdminReports = () => {
         totalOrders: dashboardData.totalOrders || 0,
         totalCustomers: dashboardData.totalUsers || 0,
         totalProducts: dashboardData.totalProducts || 0,
-        revenueGrowth: dashboardData.trends?.revenue?.percentage || 0,
-        ordersGrowth: 0,
-        customersGrowth: 0,
-        productsGrowth: 0,
       });
 
       // Transform top products
@@ -117,36 +111,12 @@ const AdminReports = () => {
     });
   };
 
-  const getGrowthIndicator = (growth) => {
-    const isPositive = growth > 0;
-    return (
-      <div
-        className={`flex items-center ${
-          isPositive ? "text-green-600" : "text-red-600"
-        }`}
-      >
-        {isPositive ? (
-          <TrendingUp className="w-4 h-4 mr-1" />
-        ) : (
-          <TrendingDown className="w-4 h-4 mr-1" />
-        )}
-        <span className="text-sm font-medium">
-          {isPositive ? "+" : ""}
-          {growth.toFixed(1)}%
-        </span>
-      </div>
-    );
-  };
-
-  const StatCard = ({ title, value, growth, icon: Icon, color = "blue" }) => (
+  const StatCard = ({ title, value, icon: Icon, color = "blue" }) => (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-gray-600">{title}</p>
           <p className="text-2xl font-bold text-gray-900 mt-2">{value}</p>
-          {growth !== undefined && (
-            <div className="mt-2">{getGrowthIndicator(growth)}</div>
-          )}
         </div>
         <div className={`p-3 rounded-full bg-${color}-100`}>
           <Icon className={`w-6 h-6 text-${color}-600`} />
@@ -323,28 +293,24 @@ const AdminReports = () => {
         <StatCard
           title="Tổng doanh thu"
           value={formatPrice(dashboardStats.totalRevenue)}
-          growth={dashboardStats.revenueGrowth}
           icon={DollarSign}
           color="green"
         />
         <StatCard
           title="Tổng đơn hàng"
           value={dashboardStats.totalOrders?.toLocaleString()}
-          growth={dashboardStats.ordersGrowth}
           icon={ShoppingCart}
           color="blue"
         />
         <StatCard
           title="Khách hàng"
           value={dashboardStats.totalCustomers?.toLocaleString()}
-          growth={dashboardStats.customersGrowth}
           icon={Users}
           color="purple"
         />
         <StatCard
           title="Sản phẩm"
           value={dashboardStats.totalProducts?.toLocaleString()}
-          growth={dashboardStats.productsGrowth}
           icon={Package}
           color="indigo"
         />

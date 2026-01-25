@@ -2,17 +2,12 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import {
   Star,
-  Plus,
-  Edit,
   Trash2,
   Eye,
   Calendar,
-  Package,
   ThumbsUp,
-  MessageCircle,
-  Image as ImageIcon
+  MessageCircle
 } from 'lucide-react'
-import { formatPrice } from '../../data/mockData'
 import { useAuthStore } from '../../store/authStore'
 import { reviewAPI } from '../../services/api'
 import toast from 'react-hot-toast'
@@ -21,7 +16,6 @@ const CustomerReviews = () => {
   const { user } = useAuthStore()
   const [reviews, setReviews] = useState([])
   const [isLoading, setIsLoading] = useState(true)
-  const [filter, setFilter] = useState('all') // all, pending, published
 
   useEffect(() => {
     fetchReviews()
@@ -31,7 +25,7 @@ const CustomerReviews = () => {
     try {
       setIsLoading(true)
       const response = await reviewAPI.getMyReviews()
-      
+
       if (response.data.status === 'success') {
         setReviews(response.data.data.reviews)
       }
@@ -55,14 +49,6 @@ const CustomerReviews = () => {
       toast.error('Không thể xóa đánh giá')
     }
   }
-
-  const filteredReviews = reviews.filter(review => {
-    if (filter === 'all') return true
-    if (filter === 'pending') return review.status === 'pending'
-    if (filter === 'approved') return review.status === 'approved'
-    if (filter === 'rejected') return review.status === 'rejected'
-    return true
-  })
 
   const renderStars = (rating) => {
     return [...Array(5)].map((_, i) => (
@@ -109,28 +95,12 @@ const CustomerReviews = () => {
           </div>
         </div>
 
-        <div className="flex items-center space-x-2">
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-            review.status === 'approved'
-              ? 'bg-green-100 text-green-800'
-              : review.status === 'rejected'
-              ? 'bg-red-100 text-red-800'
-              : 'bg-yellow-100 text-yellow-800'
-          }`}>
-            {review.status === 'approved' 
-              ? 'Đã duyệt' 
-              : review.status === 'rejected'
-              ? 'Từ chối'
-              : 'Chờ duyệt'}
-          </span>
-
-          <button
-            onClick={() => handleDeleteReview(review.id)}
-            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-        </div>
+        <button
+          onClick={() => handleDeleteReview(review.id)}
+          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
       </div>
 
       <div className="mb-4">
@@ -166,7 +136,7 @@ const CustomerReviews = () => {
         </div>
 
         <Link
-          to={`/products/${review.product.id}#reviews`}
+          to={`/products/${review.product?.id}#reviews`}
           className="btn btn-outline btn-sm flex items-center space-x-2"
         >
           <Eye className="w-4 h-4" />
@@ -191,65 +161,16 @@ const CustomerReviews = () => {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Đánh giá của tôi</h1>
           <p className="text-gray-600 mt-1">
-            Quản lý các đánh giá sản phẩm bạn đã viết
+            Quản lý các đánh giá sản phẩm bạn đã viết ({reviews.length} đánh giá)
           </p>
-        </div>
-      </div>
-
-      {/* Filters */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center space-x-4">
-          <span className="text-sm font-medium text-gray-700">Lọc theo:</span>
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => setFilter('all')}
-              className={`px-3 py-1 rounded-full text-sm font-medium ${
-                filter === 'all'
-                  ? 'bg-blue-100 text-blue-800'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              Tất cả ({reviews.length})
-            </button>
-            <button
-              onClick={() => setFilter('approved')}
-              className={`px-3 py-1 rounded-full text-sm font-medium ${
-                filter === 'approved'
-                  ? 'bg-blue-100 text-blue-800'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              Đã duyệt ({reviews.filter(r => r.status === 'approved').length})
-            </button>
-            <button
-              onClick={() => setFilter('pending')}
-              className={`px-3 py-1 rounded-full text-sm font-medium ${
-                filter === 'pending'
-                  ? 'bg-blue-100 text-blue-800'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              Chờ duyệt ({reviews.filter(r => r.status === 'pending').length})
-            </button>
-            <button
-              onClick={() => setFilter('rejected')}
-              className={`px-3 py-1 rounded-full text-sm font-medium ${
-                filter === 'rejected'
-                  ? 'bg-blue-100 text-blue-800'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              Từ chối ({reviews.filter(r => r.status === 'rejected').length})
-            </button>
-          </div>
         </div>
       </div>
 
       {/* Reviews List */}
       <div>
-        {filteredReviews.length > 0 ? (
+        {reviews.length > 0 ? (
           <div className="space-y-4">
-            {filteredReviews.map(review => (
+            {reviews.map(review => (
               <ReviewCard key={review.id} review={review} />
             ))}
           </div>
@@ -281,25 +202,6 @@ const CustomerReviews = () => {
           </div>
         )}
       </div>
-
-      {/* Pending Reviews Notice */}
-      {reviews.some(r => r.status === 'pending') && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <div className="flex items-start">
-            <div className="flex-shrink-0">
-              <MessageCircle className="w-5 h-5 text-yellow-600" />
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-yellow-800">
-                Đánh giá đang chờ duyệt
-              </h3>
-              <p className="text-sm text-yellow-700 mt-1">
-                Một số đánh giá của bạn đang được kiểm duyệt và sẽ được hiển thị công khai sau khi được phê duyệt.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

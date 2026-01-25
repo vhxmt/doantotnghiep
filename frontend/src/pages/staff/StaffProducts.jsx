@@ -1,17 +1,10 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import {
   Search,
-  Filter,
-  Eye,
   Package,
   AlertTriangle,
   CheckCircle,
   XCircle,
-  Edit,
-  BarChart3,
-  TrendingUp,
-  TrendingDown,
 } from "lucide-react";
 import useProductStore from "../../store/productStore";
 import { formatPrice } from "../../data/mockData";
@@ -24,7 +17,6 @@ const StaffProducts = () => {// funtion component để xây dựng giao diện,
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
   const [stockFilter, setStockFilter] = useState("");
   const [sortBy, setSortBy] = useState("name");
   const [sortOrder, setSortOrder] = useState("asc");
@@ -36,7 +28,7 @@ const StaffProducts = () => {// funtion component để xây dựng giao diện,
   }, [fetchProducts, fetchCategories]);
 
 
-// filteredProducts là biến chứa danh sách sản phẩm đã được lọc”
+// filteredProducts là biến chứa danh sách sản phẩm đã được lọc
   const filteredProducts = products.filter((product) => {
     const matchesSearch = // lọc theo tên, sku
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -44,16 +36,15 @@ const StaffProducts = () => {// funtion component để xây dựng giao diện,
     const matchesCategory =
       !selectedCategory ||
       product.categories?.some((cat) => cat.id.toString() === selectedCategory);
-    const matchesStatus = !statusFilter || product.status === statusFilter;
 
-    // lọc sp theo tình trạng tồn kho 
-    let matchesStock = true;// đảm bảo ko sd bộ lọc -> hiển thị tất cả sp 
+    // lọc sp theo tình trạng tồn kho
+    let matchesStock = true;// đảm bảo ko sd bộ lọc -> hiển thị tất cả sp
 
-    if (stockFilter === "low") {// khi nvien chọn bộ lọc sắp hết hang 
+    if (stockFilter === "low") {// khi nvien chọn bộ lọc sắp hết hang
       matchesStock = // ss số lượng tồn kho với ngưỡng cảnh báo
-        product.inventory?.quantity <= 
+        product.inventory?.quantity <=
         (product.inventory?.lowStockThreshold || 10);
-      } 
+      }
     else if (stockFilter === "out") {
       matchesStock = product.inventory?.quantity === 0;
     }
@@ -61,7 +52,7 @@ const StaffProducts = () => {// funtion component để xây dựng giao diện,
       matchesStock = product.inventory?.quantity > 0;
     }
 
-    return matchesSearch && matchesCategory && matchesStatus && matchesStock;
+    return matchesSearch && matchesCategory && matchesStock;
   });
    // sắp xếp ds sản phẩm sau khi lọc
   const sortedProducts = [...filteredProducts].sort((a, b) => {
@@ -263,15 +254,6 @@ const StaffProducts = () => {// funtion component để xây dựng giao diện,
           </div>
         </div>
 
-        <div className="flex items-center justify-end pt-4 border-t border-gray-200">
-          <Link
-            to={`/products/${product.id}`}
-            className="btn btn-outline btn-sm flex items-center space-x-2"
-          >
-            <Eye className="w-4 h-4" />
-            <span>Xem</span>
-          </Link>
-        </div>
       </div>
     );
   };

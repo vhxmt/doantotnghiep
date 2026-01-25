@@ -3,11 +3,8 @@ import { Link } from "react-router-dom";
 import {
   Plus,
   Search,
-  Filter,
   Edit,
   Trash2,
-  Eye,
-  MoreHorizontal,
   Package,
   AlertTriangle,
   CheckCircle,
@@ -148,10 +145,11 @@ const AdminProducts = () => {
         <div className="text-sm text-gray-900">
           {product.inventory?.quantity || 0}
         </div>
-        {product.inventory?.quantity <=
-          (product.inventory?.lowStockThreshold || 0) && (
-          <div className="text-xs text-red-600">Sắp hết hàng</div>
-        )}
+        {(product.inventory?.quantity || 0) === 0 ? (
+          <div className="text-xs text-red-600 font-medium">Hết hàng</div>
+        ) : (product.inventory?.quantity || 0) <= (product.inventory?.lowStockThreshold || 0) ? (
+          <div className="text-xs text-orange-600">Sắp hết hàng</div>
+        ) : null}
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="text-sm text-gray-900">
@@ -164,13 +162,6 @@ const AdminProducts = () => {
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
         <div className="flex items-center space-x-2">
-          <Link
-            to={`/products/${product.id}`}
-            className="text-blue-600 hover:text-blue-900"
-            title="Xem chi tiết"
-          >
-            <Eye className="w-4 h-4" />
-          </Link>
           <Link
             to={`/admin/products/${product.id}/edit`}
             className="text-indigo-600 hover:text-indigo-900"
@@ -336,12 +327,12 @@ const AdminProducts = () => {
           <div className="flex items-center">
             <AlertTriangle className="w-8 h-8 text-red-600" />
             <div className="ml-3">
-              <p className="text-sm font-medium text-gray-600">Sắp hết hàng</p>
+              <p className="text-sm font-medium text-gray-600">Hết/Sắp hết hàng</p>
               <p className="text-2xl font-bold text-gray-900">
                 {
                   products.filter(
                     (p) =>
-                      p.inventory?.quantity <=
+                      (p.inventory?.quantity || 0) <=
                       (p.inventory?.lowStockThreshold || 0)
                   ).length
                 }

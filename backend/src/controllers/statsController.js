@@ -165,15 +165,33 @@ export const getDashboardStats = catchAsync(async (req, res) => {
 export const getSalesStats = catchAsync(async (req, res) => {
   const { startDate, endDate, groupBy = "day" } = req.query;
 
+  // Include both 'delivered' and 'paid' orders for revenue calculation
   const whereClause = {
-    status: "delivered",
+    [Op.or]: [
+      { status: "delivered" },
+      { paymentStatus: "paid" }
+    ]
   };
 
   if (startDate && endDate) {
+    // Set start date to beginning of day (00:00:00)
+    const start = new Date(startDate);
+    start.setHours(0, 0, 0, 0);
+
+    // Set end date to end of day (23:59:59)
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
+
     whereClause.created_at = {
-      [Op.between]: [new Date(startDate), new Date(endDate)],
+      [Op.between]: [start, end],
     };
   }
+
+  console.log("📊 Sales stats query:", {
+    startDate,
+    endDate,
+    whereClause: JSON.stringify(whereClause, null, 2)
+  });
 
   const orders = await Order.findAll({
     where: whereClause,
@@ -186,6 +204,8 @@ export const getSalesStats = catchAsync(async (req, res) => {
     order: [[sequelize.fn("DATE", sequelize.col("created_at")), "DESC"]],
     raw: true,
   });
+
+  console.log("📊 Sales stats results:", orders);
 
   res.json({
     status: "success",

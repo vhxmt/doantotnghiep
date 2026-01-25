@@ -31,7 +31,7 @@ const Coupon = sequelize.define(
       allowNull: true,
     },
     type: {
-      type: DataTypes.ENUM("percentage", "fixed_amount"),
+      type: DataTypes.ENUM("percentage", "fixed_amount", "free_shipping"),
       allowNull: false,
       defaultValue: "percentage",
     },
@@ -157,16 +157,18 @@ Coupon.prototype.isValid = function () {
   return { valid: true };
 };
 
-Coupon.prototype.calculateDiscount = function (orderAmount) {
+Coupon.prototype.calculateDiscount = function (orderAmount, shippingAmount = 0) {
   // Check minimum order amount
   if (this.minimumOrderAmount && orderAmount < this.minimumOrderAmount) {
     return {
       discount: 0,
+      shippingDiscount: 0,
       reason: `Minimum order amount is ${this.minimumOrderAmount}`,
     };
   }
 
   let discount = 0;
+  let shippingDiscount = 0;
 
   if (this.type === "percentage") {
     discount = (orderAmount * this.value) / 100;
@@ -177,12 +179,15 @@ Coupon.prototype.calculateDiscount = function (orderAmount) {
     }
   } else if (this.type === "fixed_amount") {
     discount = this.value;
+  } else if (this.type === "free_shipping") {
+    // Free shipping discount
+    shippingDiscount = shippingAmount;
   }
 
   // Ensure discount doesn't exceed order amount
   discount = Math.min(discount, orderAmount);
 
-  return { discount, reason: null };
+  return { discount, shippingDiscount, reason: null };
 };
 
 // Static methods

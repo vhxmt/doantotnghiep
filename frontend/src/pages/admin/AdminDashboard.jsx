@@ -207,10 +207,6 @@ const AdminDashboard = () => {
           title="Doanh thu"
           value={formatCurrency(stats.totalRevenue)}
           icon={DollarSign}
-          trend={trends.revenue.percentage >= 0 ? "up" : "down"}
-          trendValue={`${trends.revenue.percentage >= 0 ? "+" : ""}${
-            trends.revenue.percentage
-          }% so với tháng trước`}
           color="yellow"
           link="/admin/reports"
         />

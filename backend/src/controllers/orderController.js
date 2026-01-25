@@ -1,4 +1,4 @@
-import { Order, OrderItem, Product, User, Inventory, ProductImage } from '../models/index.js';
+import { Order, OrderItem, Product, User, Inventory, ProductImage, Coupon } from '../models/index.js';
 import { catchAsync, ValidationError, NotFoundError } from '../utils/errors.js';
 import { Op } from 'sequelize';
 import sequelize from '../database/config.js';
@@ -53,18 +53,29 @@ export const getOrders = catchAsync(async (req, res) => {
   // Map camelCase to snake_case for order clause
   const sortFieldMap = {
     'createdAt': 'created_at',
+    'created_at': 'created_at',
     'updatedAt': 'updated_at',
     'orderNumber': 'order_number',
     'userId': 'user_id',
     'paymentStatus': 'payment_status',
     'paymentMethod': 'payment_method',
     'totalAmount': 'total_amount',
+    'total': 'total_amount',
     'subtotal': 'subtotal',
     'shippingAmount': 'shipping_amount',
     'discountAmount': 'discount_amount',
     'taxAmount': 'tax_amount'
   };
-  const orderField = sortFieldMap[sortBy] || sortBy;
+
+  // Build order clause
+  let orderClause;
+  if (sortBy === 'customer') {
+    // Sort by customer name (User.firstName)
+    orderClause = [[{ model: User, as: 'user' }, 'firstName', sortOrder.toUpperCase()]];
+  } else {
+    const orderField = sortFieldMap[sortBy] || 'created_at';
+    orderClause = [[orderField, sortOrder.toUpperCase()]];
+  }
 
   const { count, rows: orders } = await Order.findAndCountAll({
     where,
@@ -97,7 +108,7 @@ export const getOrders = catchAsync(async (req, res) => {
     ],
     limit: parseInt(limit),
     offset: parseInt(offset),
-    order: [[orderField, sortOrder.toUpperCase()]],
+    order: orderClause,
     distinct: true
   });
 
@@ -318,6 +329,18 @@ export const createOrder = catchAsync(async (req, res) => {
     }));
 
     await OrderItem.bulkCreate(orderItemsWithOrderId, { transaction });
+
+    // Update coupon usage if coupon was used
+    if (couponCode) {
+      const coupon = await Coupon.findOne({
+        where: { code: couponCode },
+        transaction
+      });
+
+      if (coupon) {
+        await coupon.increment('usedCount', { by: 1, transaction });
+      }
+    }
 
     // Commit transaction
     await transaction.commit();

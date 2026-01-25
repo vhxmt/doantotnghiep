@@ -214,7 +214,7 @@ const AdminCoupons = () => {
   const getTypeBadge = (type) => {
     const typeConfig = {
       percentage: { color: 'blue', text: 'Phần trăm', icon: Percent },
-      fixed: { color: 'green', text: 'Số tiền', icon: DollarSign },
+      fixed_amount: { color: 'green', text: 'Số tiền', icon: DollarSign },
       free_shipping: { color: 'purple', text: 'Miễn ship', icon: Gift }
     }
 
@@ -233,7 +233,7 @@ const AdminCoupons = () => {
     switch (type) {
       case 'percentage':
         return `${value}%`
-      case 'fixed':
+      case 'fixed_amount':
         return formatPrice(value)
       case 'free_shipping':
         return 'Miễn phí ship'
@@ -414,7 +414,7 @@ const AdminCoupons = () => {
             >
               <option value="">Tất cả loại</option>
               <option value="percentage">Phần trăm</option>
-              <option value="fixed">Số tiền</option>
+              <option value="fixed_amount">Số tiền</option>
               <option value="free_shipping">Miễn ship</option>
             </select>
           </div>
@@ -608,7 +608,7 @@ const AdminCoupons = () => {
                         required
                       >
                         <option value="percentage">Phần trăm (%)</option>
-                        <option value="fixed">Số tiền cố định (đ)</option>
+                        <option value="fixed_amount">Số tiền cố định (đ)</option>
                         <option value="free_shipping">Miễn phí vận chuyển</option>
                       </select>
                     </div>

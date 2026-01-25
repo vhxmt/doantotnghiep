@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Star, Trash2, Search, Check, X } from 'lucide-react'
+import { Star, Trash2, Search } from 'lucide-react'
 import { reviewAPI } from '../../services/api'
 import toast from 'react-hot-toast'
 
@@ -7,7 +7,6 @@ const AdminReviews = () => {
   const [reviews, setReviews] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [filters, setFilters] = useState({
-    status: 'all',
     rating: 'all',
     search: '',
     page: 1,
@@ -24,7 +23,6 @@ const AdminReviews = () => {
     try {
       const params = {
         ...filters,
-        status: filters.status === 'all' ? undefined : filters.status,
         rating: filters.rating === 'all' ? undefined : filters.rating,
         search: filters.search || undefined
       }
@@ -41,17 +39,6 @@ const AdminReviews = () => {
     }
   }
 
-  const handleUpdateStatus = async (id, status) => {
-    try {
-      await reviewAPI.updateReviewStatus(id, status)
-      const statusText = status === 'approved' ? 'duyệt' : status === 'rejected' ? 'từ chối' : 'cập nhật'
-      toast.success(`${statusText.charAt(0).toUpperCase() + statusText.slice(1)} đánh giá thành công`)
-      loadReviews()
-    } catch (error) {
-      toast.error('Không thể cập nhật trạng thái')
-    }
-  }
-
   const handleDelete = async (id) => {
     if (!confirm('Bạn có chắc chắn muốn xóa đánh giá này?')) return
 
@@ -64,44 +51,19 @@ const AdminReviews = () => {
     }
   }
 
-  const getStatusBadge = (status) => {
-    const config = {
-      pending: {
-        className: 'bg-yellow-100 text-yellow-800',
-        text: 'Chờ duyệt'
-      },
-      approved: {
-        className: 'bg-green-100 text-green-800',
-        text: 'Đã duyệt'
-      },
-      rejected: {
-        className: 'bg-red-100 text-red-800',
-        text: 'Từ chối'
-      }
-    }
-
-    const { className, text } = config[status] || config.pending
-
-    return (
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${className}`}>
-        {text}
-      </span>
-    )
-  }
-
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Quản lý đánh giá</h1>
         <p className="text-gray-600 mt-1">
-          Duyệt và quản lý đánh giá từ khách hàng
+          Xem và quản lý đánh giá từ khách hàng
         </p>
       </div>
 
       {/* Filters */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Search */}
           <div className="md:col-span-2">
             <div className="relative">
@@ -115,18 +77,6 @@ const AdminReviews = () => {
               />
             </div>
           </div>
-
-          {/* Status Filter */}
-          <select
-            value={filters.status}
-            onChange={(e) => setFilters({ ...filters, status: e.target.value, page: 1 })}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="all">Tất cả trạng thái</option>
-            <option value="pending">Chờ duyệt</option>
-            <option value="approved">Đã duyệt</option>
-            <option value="rejected">Từ chối</option>
-          </select>
 
           {/* Rating Filter */}
           <select
@@ -165,9 +115,6 @@ const AdminReviews = () => {
                     Nội dung
                   </th>
                   <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Trạng thái
-                  </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Ngày tạo
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -184,8 +131,8 @@ const AdminReviews = () => {
                           {review.product?.name || 'N/A'}
                         </p>
                         <p className="text-sm text-gray-500">
-                          {review.user?.firstName && review.user?.lastName 
-                            ? `${review.user.firstName} ${review.user.lastName}` 
+                          {review.user?.firstName && review.user?.lastName
+                            ? `${review.user.firstName} ${review.user.lastName}`
                             : 'Anonymous'}
                         </p>
                       </div>
@@ -218,44 +165,21 @@ const AdminReviews = () => {
                       </p>
                       {review.images && review.images.length > 0 && (
                         <p className="text-xs text-gray-500 mt-1">
-                          📷 {review.images.length} ảnh
+                          {review.images.length} ảnh
                         </p>
                       )}
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      {getStatusBadge(review.status)}
                     </td>
                     <td className="px-6 py-4 text-center text-sm text-gray-500">
                       {new Date(review.created_at).toLocaleDateString('vi-VN')}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        {review.status !== 'approved' && (
-                          <button
-                            onClick={() => handleUpdateStatus(review.id, 'approved')}
-                            className="p-2 text-green-600 hover:text-green-900 hover:bg-green-50 rounded-lg transition-colors"
-                            title="Duyệt"
-                          >
-                            <Check className="w-4 h-4" />
-                          </button>
-                        )}
-                        {review.status !== 'rejected' && (
-                          <button
-                            onClick={() => handleUpdateStatus(review.id, 'rejected')}
-                            className="p-2 text-orange-600 hover:text-orange-900 hover:bg-orange-50 rounded-lg transition-colors"
-                            title="Từ chối"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        )}
-                        <button
-                          onClick={() => handleDelete(review.id)}
-                          className="p-2 text-red-600 hover:text-red-900 hover:bg-red-50 rounded-lg transition-colors"
-                          title="Xóa"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
+                      <button
+                        onClick={() => handleDelete(review.id)}
+                        className="p-2 text-red-600 hover:text-red-900 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Xóa"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </td>
                   </tr>
                 ))}
